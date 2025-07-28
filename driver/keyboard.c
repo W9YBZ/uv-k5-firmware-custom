@@ -21,6 +21,8 @@
 #include "driver/systick.h"
 #include "driver/i2c.h"
 #include "misc.h"
+#include "audio.h"      // Needed for AUDIO_PlayBeep()
+#include "functions.h"  // Needed for FUNCTION_Select()
 
 KEY_Code_t gKeyReading0 = KEY_INVALID;
 KEY_Code_t gKeyReading1 = KEY_INVALID;

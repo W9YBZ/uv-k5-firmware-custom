@@ -145,7 +145,9 @@ void FUNCTION_PowerSave() {
 
 void FUNCTION_Transmit() {
     // if DTMF is enabled when TX'ing, it changes the TX audio filtering !! .. 1of11
-
+    // // === Play tone at start of TX ===
+    // AUDIO_PlayBeep(BEEP_880HZ_60MS_TRIPLE_BEEP);
+    
 #if defined(ENABLE_MESSENGER) || defined(ENABLE_MDC1200)
     enable_msg_rx(false);
 #endif

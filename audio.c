@@ -44,6 +44,7 @@ void AUDIO_PlayBeep(BEEP_Type_t Beep) {
         Beep != BEEP_440HZ_500MS &&
         Beep != BEEP_880HZ_200MS &&
         Beep != BEEP_880HZ_500MS &&
+        Beep != BEEP_TALK_PREMIT &&
         !gEeprom.BEEP_CONTROL)
         return;
 
@@ -79,6 +80,9 @@ void AUDIO_PlayBeep(BEEP_Type_t Beep) {
         case BEEP_1KHZ_60MS_OPTIONAL:
             ToneFrequency = 1000;
             break;
+        case BEEP_1KHZ_40MS:
+            ToneFrequency = 1200;
+            break;
         case BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL:
         case BEEP_500HZ_60MS_DOUBLE_BEEP:
             ToneFrequency = 500;
@@ -93,6 +97,9 @@ void AUDIO_PlayBeep(BEEP_Type_t Beep) {
         case BEEP_880HZ_500MS:
             ToneFrequency = 880;
             break;
+        case BEEP_TALK_PREMIT:
+            ToneFrequency = 940;
+            break;
     }
 
     BK4819_PlayTone(ToneFrequency, true);
@@ -105,6 +112,22 @@ void AUDIO_PlayBeep(BEEP_Type_t Beep) {
 
     uint16_t Duration;
     switch (Beep) {
+        case BEEP_TALK_PREMIT:
+            BK4819_ExitTxMute();
+            SYSTEM_DelayMs(40);            // First tone duration (800 Hz)
+            BK4819_EnterTxMute();
+            SYSTEM_DelayMs(10);            // Pause
+            BK4819_ExitTxMute();
+            SYSTEM_DelayMs(40);            // Second tone duration
+            [[fallthrough]];
+        case BEEP_1KHZ_40MS:
+            BK4819_EnterTxMute();
+            SYSTEM_DelayMs(10);
+
+            BK4819_ExitTxMute();
+            Duration = 40;
+        break;
+
         case BEEP_880HZ_60MS_TRIPLE_BEEP:
             BK4819_ExitTxMute();
             SYSTEM_DelayMs(60);

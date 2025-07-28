@@ -133,7 +133,6 @@ void GENERIC_Key_PTT(bool bKeyPressed) {
 
     // PTT pressed
 
-
     if (SCANNER_IsScanning()) {    // CTCSS/CDCSS scanning .. stop
         SCANNER_Stop();
         goto cancel_tx;
@@ -204,6 +203,7 @@ void GENERIC_Key_PTT(bool bKeyPressed) {
 
     start_tx:
     // request start TX
+    AUDIO_PlayBeep(BEEP_TALK_PREMIT); // <-- Your TX-start tone
     gFlagPrepareTX = true;
     goto done;
 
