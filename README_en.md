@@ -2,6 +2,8 @@
 
 **语言版本: [English](./README_en.md), [中文](./README.md).**
 
+**This folk added Talk permit tone**
+
 # [K5Web]( https://k5.vicicode.com/)
 * Supports online firmware functionality compilation, no need to install the compilation environment!!
 * Doppler satellite, boot image text, SI4732 SSB patch frequency writing method!
