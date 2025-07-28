@@ -3,6 +3,8 @@
 **语言版本: [English](./README_en.md), [中文](./README.md).**
 
 
+**这个版本增加了Talk permit tone**
+
 # [K5Web]( https://k5.vicicode.com/)
 * 支持在线固件功能编译，无需安装编译环境！！
 * 多普勒卫星、开机图片文字、SI4732 SSB补丁的写频方式！
