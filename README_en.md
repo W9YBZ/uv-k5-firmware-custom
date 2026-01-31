@@ -2,7 +2,7 @@
 
 **语言版本: [English](./README_en.md), [中文](./README.md).**
 
-**This folk added Talk permit tone**
+**This fork adds a talk-permit tone** (short beep when PTT starts TX; plays even if key tones are off).
 
 # [K5Web]( https://k5.vicicode.com/)
 * Supports online firmware functionality compilation, no need to install the compilation environment!!
@@ -63,6 +63,7 @@ functions:
 * **Radio receiver**
 * **AM fix**
 * **SSB demodulation**
+* **Talk-permit tone on TX start**
 
 
 # Operating Instructions (Mandatory Reading!!)

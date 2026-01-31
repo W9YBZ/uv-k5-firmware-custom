@@ -3,7 +3,7 @@
 **语言版本: [English](./README_en.md), [中文](./README.md).**
 
 
-**这个版本增加了Talk permit tone**
+**这个版本增加了 Talk permit tone**（PTT开始发射时提示音，按键音关闭也会播放）。
 
 # [K5Web]( https://k5.vicicode.com/)
 * 支持在线固件功能编译，无需安装编译环境！！
@@ -64,6 +64,7 @@
 * **收音机**
 * **AM 修复**
 * **SSB 解调**
+* **发射开始提示音（Talk permit tone）**
 
 # 操作说明(必读！！)
 

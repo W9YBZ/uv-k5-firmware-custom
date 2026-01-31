@@ -27,7 +27,7 @@ enum BEEP_Type_t
 {
 	BEEP_NONE = 0,
 	BEEP_1KHZ_60MS_OPTIONAL,
-	BEEP_1KHZ_40MS,
+	BEEP_1KHZ_40MS,               // short 40 ms tone used by composite beeps
 	BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL,
 	BEEP_440HZ_500MS,
 	BEEP_880HZ_200MS,
@@ -36,7 +36,7 @@ enum BEEP_Type_t
 	BEEP_440HZ_40MS_OPTIONAL,
 	BEEP_880HZ_40MS_OPTIONAL,
 	BEEP_880HZ_60MS_TRIPLE_BEEP,
-	BEEP_TALK_PREMIT
+	BEEP_TALK_PREMIT             // talk-permit tone played at TX start
 };
 
 typedef enum BEEP_Type_t BEEP_Type_t;
