@@ -29,6 +29,7 @@ Please visit: [K5Web]( https://k5.vicicode.com/)
 # Version Description
 
 * The current versions are: **LOSEHUxxx**, **LOSEHUxxxK**, **LOSEHUxxxH**, **LOSEHUxxxE**, **LOSEHUxxxEK**, **LOSEHUxxxHS**
+* Custom build: **W9YBZ_KMC25-PF** (adds KMC-25 style speaker-mic PF1/PF2 buttons via DATA/TX Data resistor ladder)
 * 
 | Version       | Language | EEPROM Requirement | MDC1200 | Doppler Mode | Spectrum | Radio | Chinese Channel Name | Custom Boot Image | Boot Image | Chinese Input Method | SMS |
 |---------------|----------|---------------------|---------|--------------|----------|-------|----------------------|-------------------|------------|----------------------|-----|
