@@ -426,6 +426,10 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax) {
 #ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
             case MENU_F1SHRT:
             case MENU_F2SHRT:
+#ifdef ENABLE_MIC_PF
+            case MENU_MPF1SHRT:
+            case MENU_MPF2SHRT:
+#endif
                 *pMin = 0;
 
 #ifdef ENABLE_SIDEFUNCTIONS_SEND
@@ -439,6 +443,10 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax) {
             case MENU_F1LONG:
             case MENU_F2LONG:
             case MENU_MLONG:
+#ifdef ENABLE_MIC_PF
+            case MENU_MPF1LONG:
+            case MENU_MPF2LONG:
+#endif
                 *pMin = 0;
 
 
@@ -898,6 +906,22 @@ void MENU_AcceptSetting(void) {
                     *fun[UI_MENU_GetCurrentMenuId()-MENU_F1SHRT] = gSubMenu_SIDEFUNCTIONS[gSubMenuSelection].id;
                 }
                 break;
+#ifdef ENABLE_MIC_PF
+            case MENU_MPF1SHRT:
+            case MENU_MPF1LONG:
+            case MENU_MPF2SHRT:
+            case MENU_MPF2LONG:
+                {
+                    uint8_t *fun[] = {
+                        &gEeprom.MIC_PF1_SHORT_PRESS_ACTION,
+                        &gEeprom.MIC_PF1_LONG_PRESS_ACTION,
+                        &gEeprom.MIC_PF2_SHORT_PRESS_ACTION,
+                        &gEeprom.MIC_PF2_LONG_PRESS_ACTION
+                    };
+                    *fun[UI_MENU_GetCurrentMenuId() - MENU_MPF1SHRT] = gSubMenu_SIDEFUNCTIONS[gSubMenuSelection].id;
+                }
+                break;
+#endif
 #endif
 
     }
@@ -1268,6 +1292,28 @@ void MENU_ShowCurrentSetting(void) {
             }
             break;
         }
+#ifdef ENABLE_MIC_PF
+        case MENU_MPF1SHRT:
+        case MENU_MPF1LONG:
+        case MENU_MPF2SHRT:
+        case MENU_MPF2LONG: {
+            uint8_t *fun[] = {
+                &gEeprom.MIC_PF1_SHORT_PRESS_ACTION,
+                &gEeprom.MIC_PF1_LONG_PRESS_ACTION,
+                &gEeprom.MIC_PF2_SHORT_PRESS_ACTION,
+                &gEeprom.MIC_PF2_LONG_PRESS_ACTION
+            };
+            uint8_t id = *fun[UI_MENU_GetCurrentMenuId() - MENU_MPF1SHRT];
+
+            for (int i = 0; i < gSubMenu_SIDEFUNCTIONS_size; i++) {
+                if (gSubMenu_SIDEFUNCTIONS[i].id == id) {
+                    gSubMenuSelection = i;
+                    break;
+                }
+            }
+            break;
+        }
+#endif
 #endif
 
         default:

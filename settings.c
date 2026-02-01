@@ -134,6 +134,14 @@ void SETTINGS_InitEEPROM(void)
     gEeprom.KEY_1_LONG_PRESS_ACTION       = (Data[2] < ACTION_OPT_LEN) ? Data[2] : ACTION_OPT_D_DCD;
     gEeprom.KEY_2_SHORT_PRESS_ACTION      = (Data[3] < ACTION_OPT_LEN-2) ? Data[3] : ACTION_OPT_WIDTH;
     gEeprom.KEY_2_LONG_PRESS_ACTION       = (Data[4] < ACTION_OPT_LEN) ? Data[4] : ACTION_OPT_FLASHLIGHT;
+#ifdef ENABLE_MIC_PF
+    // 1FE8..1FEF
+    EEPROM_ReadBuffer(0x1FE8, Data, 8);
+    gEeprom.MIC_PF1_SHORT_PRESS_ACTION    = (Data[0] < ACTION_OPT_LEN-2) ? Data[0] : ACTION_OPT_WIDTH;
+    gEeprom.MIC_PF1_LONG_PRESS_ACTION     = (Data[1] < ACTION_OPT_LEN) ? Data[1] : ACTION_OPT_A_B;
+    gEeprom.MIC_PF2_SHORT_PRESS_ACTION    = (Data[2] < ACTION_OPT_LEN-2) ? Data[2] : ACTION_OPT_FLASHLIGHT;
+    gEeprom.MIC_PF2_LONG_PRESS_ACTION     = (Data[3] < ACTION_OPT_LEN) ? Data[3] : ACTION_OPT_BLMIN_TMP_OFF;
+#endif
 #endif
 
     // 0E98..0E9F
@@ -570,6 +578,13 @@ void SETTINGS_SaveSettings(void)
     State[6] = 0;
     State[7] = 0;
     EEPROM_WriteBuffer(0x1FF8, State, 5);
+#ifdef ENABLE_MIC_PF
+    State[0] = gEeprom.MIC_PF1_SHORT_PRESS_ACTION;
+    State[1] = gEeprom.MIC_PF1_LONG_PRESS_ACTION;
+    State[2] = gEeprom.MIC_PF2_SHORT_PRESS_ACTION;
+    State[3] = gEeprom.MIC_PF2_LONG_PRESS_ACTION;
+    EEPROM_WriteBuffer(0x1FE8, State, 4);
+#endif
 #endif
 
     memset(Password, 0xFF, sizeof(Password));

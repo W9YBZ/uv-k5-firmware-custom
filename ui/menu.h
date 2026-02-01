@@ -145,6 +145,12 @@ enum {
     MENU_F2SHRT,
     MENU_F2LONG,
     MENU_MLONG,
+#ifdef ENABLE_MIC_PF
+    MENU_MPF1SHRT,
+    MENU_MPF1LONG,
+    MENU_MPF2SHRT,
+    MENU_MPF2LONG,
+#endif
 #endif
     MENU_BATTYP
 };

@@ -206,6 +206,12 @@ typedef struct {
     uint8_t               KEY_1_LONG_PRESS_ACTION;
     uint8_t               KEY_2_SHORT_PRESS_ACTION;
     uint8_t               KEY_2_LONG_PRESS_ACTION;
+#ifdef ENABLE_MIC_PF
+    uint8_t               MIC_PF1_SHORT_PRESS_ACTION;
+    uint8_t               MIC_PF1_LONG_PRESS_ACTION;
+    uint8_t               MIC_PF2_SHORT_PRESS_ACTION;
+    uint8_t               MIC_PF2_LONG_PRESS_ACTION;
+#endif
 #endif
     uint8_t               MIC_SENSITIVITY;
     uint8_t               MIC_SENSITIVITY_TUNING;

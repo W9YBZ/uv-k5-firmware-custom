@@ -30,6 +30,7 @@ Please visit: [K5Web]( https://k5.vicicode.com/)
 
 * The current versions are: **LOSEHUxxx**, **LOSEHUxxxK**, **LOSEHUxxxH**, **LOSEHUxxxE**, **LOSEHUxxxEK**, **LOSEHUxxxHS**
 * Custom build: **W9YBZ_KMC25-PF** (adds KMC-25 style speaker-mic PF1/PF2 buttons via DATA/TX Data resistor ladder)
+* KMC-25 PF menu items: `MPF1S/MPF1L/MPF2S/MPF2L` (defaults: PF1 short=Wide/Narrow, PF1 long=A/B, PF2 short=Flashlight, PF2 long=Backlight)
 * 
 | Version       | Language | EEPROM Requirement | MDC1200 | Doppler Mode | Spectrum | Radio | Chinese Channel Name | Custom Boot Image | Boot Image | Chinese Input Method | SMS |
 |---------------|----------|---------------------|---------|--------------|----------|-------|----------------------|-------------------|------------|----------------------|-----|
@@ -99,6 +100,7 @@ functions:
 | **Long Press Side Key 1** | DTMF decoding switch                                                                                                                                     |
 | **Short Press Side Key 2** | Set wide/narrow band                                                                                                                                     |
 | **Long Press Side Key 2** | Flashlight                                                                                                                                               |
+| **KMC-25 PF1/PF2** | Configurable via menu `MPF1S/MPF1L/MPF2S/MPF2L`                                                                                                                |
 |**Wide/Narrow Band, DTMF decoding, FM/AM/USB Switching**| Integrated into custom **Side Key and M**                                                                                                                |
 | 🎤 **SI4732 Radio**          |                                                      |
 | **Short press `Side Key 1`, Short press `Side Key 2`** | Change BFO in SSB mode                                      |
@@ -125,6 +127,7 @@ functions:
 | 0X01FFF                                | **MDC1200** - Number of MDC contacts                                                                                                                    |
 | 0x01FFD~0x01FFE                        | **MDC1200** - MDC ID                                                                                                                                    |
 | 0x01FF8~0x01FFC                        | Side key functions                                                                                                                                      |
+| 0x01FE8~0x01FEF                        | KMC-25 speaker-mic PF1/PF2 key functions                                                                                                                |
 | 0x01FFD~0x01FFE                        | **MDC1200** - MDC ID                                                                                                                                    |
 | 😱 **Expanded Version (K, H)**          | Version: LOSEHUxxxK, LOSEHUxxxH                                                                                                                         |
 | 0x02000~0x02012                        | Boot character 1                                                                                                                                        |

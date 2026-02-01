@@ -97,6 +97,12 @@ const t_menu_item MenuList[] =
                 {/*"F2Shrt",*/ VOICE_ID_INVALID,                       MENU_F2SHRT        ,侧键2短按},
                 {/*"F2Long",*/ VOICE_ID_INVALID,                       MENU_F2LONG        ,侧键2长按},
                 {/*"M Long",*/ VOICE_ID_INVALID,                       MENU_MLONG         ,M键长按},
+#ifdef ENABLE_MIC_PF
+                {/*"MPF1S",*/ VOICE_ID_INVALID,                        MENU_MPF1SHRT      ,"MPF1S"},
+                {/*"MPF1L",*/ VOICE_ID_INVALID,                        MENU_MPF1LONG      ,"MPF1L"},
+                {/*"MPF2S",*/ VOICE_ID_INVALID,                        MENU_MPF2SHRT      ,"MPF2S"},
+                {/*"MPF2L",*/ VOICE_ID_INVALID,                        MENU_MPF2LONG      ,"MPF2L"},
+#endif
 #endif
 
 #ifdef ENABLE_DTMF_CALLING
@@ -1388,6 +1394,12 @@ void UI_DisplayMenu(void) {
             case MENU_F2SHRT:
             case MENU_F2LONG:
             case MENU_MLONG:
+#ifdef ENABLE_MIC_PF
+            case MENU_MPF1SHRT:
+            case MENU_MPF1LONG:
+            case MENU_MPF2SHRT:
+            case MENU_MPF2LONG:
+#endif
                 strcpy(String, gSubMenu_SIDEFUNCTIONS[gSubMenuSelection].name);
                 break;
 #endif

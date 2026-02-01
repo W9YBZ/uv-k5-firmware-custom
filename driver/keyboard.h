@@ -41,6 +41,8 @@ enum KEY_Code_e {
 	KEY_PTT,    //
 	KEY_SIDE2,  //
 	KEY_SIDE1,  //
+	KEY_MIC_PF1, //
+	KEY_MIC_PF2, //
 	KEY_INVALID //
 };
 typedef enum KEY_Code_e KEY_Code_t;

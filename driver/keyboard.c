@@ -162,9 +162,9 @@ static KEY_Code_t KEYBOARD_ReadMicPf(void) {
             v = (uint16_t)(sum / samples);
         }
         if (v <= MIC_PF_ADC_PF1_MAX)
-            key = KEY_SIDE2;
+            key = KEY_MIC_PF1;
         else if (v >= MIC_PF_ADC_PF2_MIN && v <= MIC_PF_ADC_PF2_MAX)
-            key = KEY_SIDE1;
+            key = KEY_MIC_PF2;
 
         if (latched_key != KEY_INVALID) {
             if (v >= MIC_PF_ADC_RELEASE_MIN) {

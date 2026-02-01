@@ -1691,10 +1691,10 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
             // but we don't want it to complain when initial press happens
             // we want to react on realese instead
 #ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
-            else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 &&        // pass side buttons
+            else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 && Key != KEY_MIC_PF1 && Key != KEY_MIC_PF2 &&        // pass side buttons
                  !(Key == KEY_MENU && bKeyHeld && gEeprom.KEY_M_LONG_PRESS_ACTION == ACTION_OPT_KEYLOCK)) // pass KEY_MENU held
 #else
-        else if (Key != KEY_SIDE1 && Key != KEY_SIDE2) // pass KEY_MENU held
+        else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 && Key != KEY_MIC_PF1 && Key != KEY_MIC_PF2) // pass KEY_MENU held
 #endif
         {
 
@@ -1746,7 +1746,7 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
     }
 
     if (gWasFKeyPressed &&
-        (Key == KEY_PTT || Key == KEY_EXIT || Key == KEY_SIDE1 || Key == KEY_SIDE2)) {    // cancel the F-key
+        (Key == KEY_PTT || Key == KEY_EXIT || Key == KEY_SIDE1 || Key == KEY_SIDE2 || Key == KEY_MIC_PF1 || Key == KEY_MIC_PF2)) {    // cancel the F-key
         gWasFKeyPressed = false;
         gUpdateStatus = true;
     }
@@ -1814,7 +1814,7 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
                 gPttWasReleased = true;
         }
 #endif
-    } else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 && gScreenToDisplay != DISPLAY_INVALID) {
+    } else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 && Key != KEY_MIC_PF1 && Key != KEY_MIC_PF2 && gScreenToDisplay != DISPLAY_INVALID) {
         ProcessKeysFunctions[gScreenToDisplay](Key, bKeyPressed, bKeyHeld);
     } else if (!SCANNER_IsScanning()
 #ifdef ENABLE_AIRCOPY

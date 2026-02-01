@@ -115,6 +115,7 @@ endif
 
 ifeq ($(ENABLE_MIC_PF),1)
 	PACKED_FILE_SUFFIX := W9YBZ_KMC25-PF
+	ENABLE_BLMIN_TMP_OFF := 1
 endif
 
 

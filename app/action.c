@@ -293,6 +293,16 @@ void ACTION_Handle(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
             funcShort = gEeprom.KEY_2_SHORT_PRESS_ACTION;
             funcLong  = gEeprom.KEY_2_LONG_PRESS_ACTION;
             break;
+#ifdef ENABLE_MIC_PF
+        case KEY_MIC_PF1:
+            funcShort = gEeprom.MIC_PF1_SHORT_PRESS_ACTION;
+            funcLong  = gEeprom.MIC_PF1_LONG_PRESS_ACTION;
+            break;
+        case KEY_MIC_PF2:
+            funcShort = gEeprom.MIC_PF2_SHORT_PRESS_ACTION;
+            funcLong  = gEeprom.MIC_PF2_LONG_PRESS_ACTION;
+            break;
+#endif
         case KEY_MENU:
             funcLong  = gEeprom.KEY_M_LONG_PRESS_ACTION;
             break;
