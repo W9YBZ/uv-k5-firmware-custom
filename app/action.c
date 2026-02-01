@@ -116,6 +116,53 @@ void (*action_opt_table[])(void) = {
 
 static_assert(ARRAY_SIZE(action_opt_table) == ACTION_OPT_LEN);
 
+static bool ACTION_GetToggleWillEnable(const enum ACTION_OPT_t action, bool *will_enable)
+{
+    switch (action) {
+#ifdef ENABLE_FLASHLIGHT
+        case ACTION_OPT_FLASHLIGHT:
+            *will_enable = (gFlashLightState == FLASHLIGHT_OFF);
+            return true;
+#endif
+        case ACTION_OPT_MONITOR:
+            *will_enable = (gCurrentFunction != FUNCTION_MONITOR);
+            return true;
+#ifdef ENABLE_VOX
+        case ACTION_OPT_VOX:
+            *will_enable = !gEeprom.VOX_SWITCH;
+            return true;
+#endif
+        case ACTION_OPT_KEYLOCK:
+            *will_enable = !gEeprom.KEY_LOCK;
+            return true;
+#ifdef ENABLE_FMRADIO
+        case ACTION_OPT_FM:
+            *will_enable = !gFmRadioMode;
+            return true;
+#endif
+        case ACTION_OPT_D_DCD:
+            *will_enable = !gTxVfo->DTMF_DECODING_ENABLE;
+            return true;
+#ifdef ENABLE_BLMIN_TMP_OFF
+        case ACTION_OPT_BLMIN_TMP_OFF:
+            *will_enable = (gEeprom.BACKLIGHT_MIN_STAT == BLMIN_STAT_OFF);
+            return true;
+#endif
+        default:
+            return false;
+    }
+}
+
+static BEEP_Type_t ACTION_SelectBeep(const enum ACTION_OPT_t action)
+{
+    bool will_enable = false;
+
+    if (ACTION_GetToggleWillEnable(action, &will_enable))
+        return will_enable ? BEEP_1KHZ_60MS_OPTIONAL : BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
+
+    return BEEP_1KHZ_60MS_OPTIONAL;
+}
+
 void ACTION_Power(void) {
     if (++gTxVfo->OUTPUT_POWER > OUTPUT_POWER_HIGH)
         gTxVfo->OUTPUT_POWER = OUTPUT_POWER_LOW;
@@ -334,9 +381,6 @@ void ACTION_Handle(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
 
     // held or released beyond this point
 
-    if (!(bKeyHeld && !bKeyPressed)) // don't beep on released after hold
-        gBeepToPlay = BEEP_1KHZ_60MS_OPTIONAL;
-
     if (bKeyHeld || bKeyPressed) // held
     {
         funcShort = funcLong;
@@ -356,6 +400,8 @@ void ACTION_Handle(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
     }
 
     // held or released after short press beyond this point
+    if (!(bKeyHeld && !bKeyPressed)) // don't beep on released after hold
+        gBeepToPlay = ACTION_SelectBeep(funcShort);
     action_opt_table[funcShort]();
 //	switch (funcShort)
 //	{
