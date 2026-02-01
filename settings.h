@@ -172,6 +172,7 @@ typedef struct {
     VOICE_Prompt_t    VOICE_PROMPT;
 #endif
     bool                  BEEP_CONTROL;
+    bool                  TALK_PERMIT_TONE;
     uint8_t               CHANNEL_DISPLAY_MODE;
     bool                  TAIL_TONE_ELIMINATION;
     bool                  VFO_OPEN;

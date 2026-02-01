@@ -300,6 +300,7 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax) {
             //case MENU_AUTOLK:
             //case MENU_S_ADD1:
             //case MENU_S_ADD2:
+        case MENU_TP_TONE:
         case MENU_STE:
         case MENU_D_ST:
 #ifdef ENABLE_DTMF_CALLING
@@ -636,6 +637,10 @@ void MENU_AcceptSetting(void) {
 //		case MENU_BEEP:
 //			gEeprom.BEEP_CONTROL = gSubMenuSelection;
 //			break;
+
+        case MENU_TP_TONE:
+            gEeprom.TALK_PERMIT_TONE = gSubMenuSelection;
+            break;
 
         case MENU_TOT:
             gEeprom.TX_TIMEOUT_TIMER = gSubMenuSelection;
@@ -1047,6 +1052,10 @@ void MENU_ShowCurrentSetting(void) {
 //		case MENU_BEEP:
 //			gSubMenuSelection = gEeprom.BEEP_CONTROL;
 //			break;
+
+        case MENU_TP_TONE:
+            gSubMenuSelection = gEeprom.TALK_PERMIT_TONE;
+            break;
 
         case MENU_TOT:
             gSubMenuSelection = gEeprom.TX_TIMEOUT_TIMER;

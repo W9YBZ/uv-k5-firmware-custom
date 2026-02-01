@@ -204,7 +204,8 @@ void GENERIC_Key_PTT(bool bKeyPressed) {
     start_tx:
     // request start TX
     // Play a short talk-permit tone for immediate TX-start feedback.
-    AUDIO_PlayBeep(BEEP_TALK_PREMIT);
+    if (gEeprom.TALK_PERMIT_TONE)
+        AUDIO_PlayBeep(BEEP_TALK_PREMIT);
     gFlagPrepareTX = true;
     goto done;
 

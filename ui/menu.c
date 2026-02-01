@@ -85,6 +85,7 @@ const t_menu_item MenuList[] =
                 {/*"MDCID",*/  VOICE_ID_INVALID, MENU_MDC_ID, MDC_ID},
 
                 {/*"Roger",*/  VOICE_ID_INVALID, MENU_ROGER, 首尾音},
+                {/*"TPTone",*/ VOICE_ID_INVALID, MENU_TP_TONE, "TPTone"},
 
                 {/*"STE",*/    VOICE_ID_INVALID, MENU_STE, 尾音消除},
                 {/*"RP STE",*/ VOICE_ID_INVALID, MENU_RP_STE, 过中继尾音消除},
@@ -875,6 +876,7 @@ void UI_DisplayMenu(void) {
             //     case MENU_BEEP:
 //        case MENU_S_ADD1:
 //        case MENU_S_ADD2:
+        case MENU_TP_TONE:
         case MENU_STE:
         case MENU_D_ST:
 #ifdef ENABLE_DTMF_CALLING

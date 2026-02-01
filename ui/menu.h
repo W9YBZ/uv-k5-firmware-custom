@@ -61,6 +61,7 @@ enum {
     //MENU_ABR_MIN,
     MENU_ABR_MAX,
     MENU_TDR,
+    MENU_TP_TONE,
     //MENU_BEEP,
 #ifdef ENABLE_VOICE
     MENU_VOICE,
