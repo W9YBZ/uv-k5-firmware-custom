@@ -76,8 +76,10 @@
 #include "driver/backlight.h"
 #include "driver/bk4819.h"
 #include "driver/gpio.h"
+#include "driver/adc.h"
 #include "driver/system.h"
 #include "driver/systick.h"
+#include "bsp/dp32g030/portcon.h"
 
 #ifdef ENABLE_UART
 
@@ -96,6 +98,21 @@
 #include "driver/eeprom.h"
 #include "driver/st7565.h"
 
+#if defined(ENABLE_MIC_PF)
+#ifndef MIC_PF_ADC_CH
+#define MIC_PF_ADC_CH ADC_CH2
+#endif
+#ifndef MIC_PF_ADC_PF1_MAX
+#define MIC_PF_ADC_PF1_MAX 1100
+#endif
+#ifndef MIC_PF_ADC_PF2_MAX
+#define MIC_PF_ADC_PF2_MAX 2000
+#endif
+#ifndef MIC_PF_ADC_PF2_MIN
+#define MIC_PF_ADC_PF2_MIN 1200
+#endif
+#endif
+
 void _putchar(__attribute__((unused)) char c) {
 
 #ifdef ENABLE_UART
@@ -103,6 +120,80 @@ void _putchar(__attribute__((unused)) char c) {
 #endif
 
 }
+
+#if defined(ENABLE_MIC_PF)
+static void MIC_PF_DebugLoop(void) {
+    uint16_t v = 0xFFFF;
+    uint16_t v_min = 0xFFFF;
+    uint16_t v_max = 0;
+    KEY_Code_t key = KEY_INVALID;
+
+    UI_DisplayClear();
+    UI_PrintStringSmall("MIC PF ADC", 0, 127, 0);
+    UI_PrintStringSmall("EXIT=QUIT", 0, 127, 6);
+    ST7565_BlitStatusLine();
+    ST7565_BlitFullScreen();
+
+    while (1) {
+        if (KEYBOARD_Poll() == KEY_EXIT)
+            break;
+
+        uint32_t sel0 = PORTCON_PORTA_SEL0;
+        PORTCON_PORTA_SEL0 = (sel0 & ~PORTCON_PORTA_SEL0_A7_MASK) | PORTCON_PORTA_SEL0_A7_BITS_SARADC_CH2;
+
+        {
+            uint32_t sum = 0;
+            v_min = 0xFFFF;
+            v_max = 0;
+            unsigned int samples = 0;
+            for (unsigned int s = 0; s < 6; s++) {
+                ADC_Start();
+                for (unsigned int i = 0; i < 2000; i++) {
+                    if (ADC_CheckEndOfConversion(MIC_PF_ADC_CH)) {
+                        uint16_t sample = ADC_GetValue(MIC_PF_ADC_CH);
+                        sum += sample;
+                        if (sample < v_min)
+                            v_min = sample;
+                        if (sample > v_max)
+                            v_max = sample;
+                        samples++;
+                        break;
+                    }
+                }
+            }
+            if (samples >= 3)
+                v = (uint16_t)((sum - v_min - v_max) / (samples - 2));
+            else if (samples > 0)
+                v = (uint16_t)(sum / samples);
+
+            key = KEY_INVALID;
+            if (v <= MIC_PF_ADC_PF1_MAX)
+                key = KEY_SIDE2;
+            else if (v >= MIC_PF_ADC_PF2_MIN && v <= MIC_PF_ADC_PF2_MAX)
+                key = KEY_SIDE1;
+        }
+
+        PORTCON_PORTA_SEL0 = sel0;
+
+        UI_DisplayClear();
+        UI_PrintStringSmall("MIC PF ADC", 0, 127, 0);
+        show_uint32(v, 1);
+        show_uint32(v_min, 2);
+        show_uint32(v_max, 3);
+        if (key == KEY_SIDE2)
+            UI_PrintStringSmall("KEY=ORANGE", 0, 127, 4);
+        else if (key == KEY_SIDE1)
+            UI_PrintStringSmall("KEY=BLACK", 0, 127, 4);
+        else
+            UI_PrintStringSmall("KEY=NONE", 0, 127, 4);
+        UI_PrintStringSmall("EXIT=QUIT", 0, 127, 6);
+        ST7565_BlitStatusLine();
+        ST7565_BlitFullScreen();
+
+        SYSTEM_DelayMs(50);
+    }
+}
+#endif
 
 
 void Main(void) {
@@ -217,6 +308,12 @@ void Main(void) {
     }
 #endif
     UI_DisplayWelcome();
+
+#if defined(ENABLE_MIC_PF)
+    if (KEYBOARD_Poll() == KEY_F) {
+        MIC_PF_DebugLoop();
+    }
+#endif
 
 #ifdef ENABLE_BOOTLOADER
 

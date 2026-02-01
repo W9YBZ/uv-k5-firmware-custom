@@ -59,6 +59,7 @@ ENABLE_SIDEFUNCTIONS_SEND     ?= 1
 ENABLE_BLOCK                  ?= 0
 ENABLE_PINYIN 				   =0
 ENABLE_TURN ?=1
+ENABLE_MIC_PF                 ?= 0
 # ---- DEBUGGING ----
 ENABLE_AM_FIX_SHOW_DATA       ?= 0
 ENABLE_AGC_SHOW_DATA          ?= 0
@@ -110,6 +111,10 @@ ifeq ($(ENABLE_4732),1)
 endif
 ifeq ($(ENABLE_FMRADIO),1)
 	ENABLE_4732=0
+endif
+
+ifeq ($(ENABLE_MIC_PF),1)
+	PACKED_FILE_SUFFIX := W9YBZ_KMC25-PF
 endif
 
 
@@ -427,6 +432,11 @@ ifeq ($(ENABLE_CUSTOM_SIDEFUNCTIONS),1)
 endif
 ifeq ($(ENABLE_SIDEFUNCTIONS_SEND),1)
     CFLAGS  += -DENABLE_SIDEFUNCTIONS_SEND
+endif
+#endif
+
+ifeq ($(ENABLE_MIC_PF),1)
+	CFLAGS += -DENABLE_MIC_PF
 endif
 #endif
 

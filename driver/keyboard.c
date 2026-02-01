@@ -23,6 +23,29 @@
 #include "misc.h"
 #include "audio.h"      // Needed for AUDIO_PlayBeep()
 #include "functions.h"  // Needed for FUNCTION_Select()
+#include "bsp/dp32g030/portcon.h"
+#include "driver/adc.h"
+
+#if defined(ENABLE_MIC_PF)
+#ifndef MIC_PF_ADC_CH
+#define MIC_PF_ADC_CH ADC_CH2
+#endif
+#ifndef MIC_PF_ADC_PF1_MAX
+#define MIC_PF_ADC_PF1_MAX 1100
+#endif
+#ifndef MIC_PF_ADC_PF2_MAX
+#define MIC_PF_ADC_PF2_MAX 2000
+#endif
+#ifndef MIC_PF_ADC_PF2_MIN
+#define MIC_PF_ADC_PF2_MIN 1200
+#endif
+#ifndef MIC_PF_ADC_RELEASE_MIN
+#define MIC_PF_ADC_RELEASE_MIN 3300
+#endif
+#ifndef MIC_PF_RELEASE_COUNT
+#define MIC_PF_RELEASE_COUNT 2
+#endif
+#endif
 
 KEY_Code_t gKeyReading0 = KEY_INVALID;
 KEY_Code_t gKeyReading1 = KEY_INVALID;
@@ -98,6 +121,75 @@ static const struct {
         }
 };
 
+#if defined(ENABLE_MIC_PF)
+static KEY_Code_t KEYBOARD_ReadMicPf(void) {
+    uint32_t sel0 = PORTCON_PORTA_SEL0;
+    KEY_Code_t key = KEY_INVALID;
+    static KEY_Code_t latched_key = KEY_INVALID;
+    static uint8_t release_count = 0;
+
+    if (SerialConfigInProgress())
+        return KEY_INVALID;
+
+    // Temporarily switch PA7 to ADC for the mic PF ladder read
+    PORTCON_PORTA_SEL0 = (sel0 & ~PORTCON_PORTA_SEL0_A7_MASK) | PORTCON_PORTA_SEL0_A7_BITS_SARADC_CH2;
+
+    uint32_t sum = 0;
+    uint16_t min_v = 0xFFFF;
+    uint16_t max_v = 0;
+    unsigned int samples = 0;
+    for (unsigned int s = 0; s < 6; s++) {
+        ADC_Start();
+        for (unsigned int i = 0; i < 2000; i++) {
+            if (ADC_CheckEndOfConversion(MIC_PF_ADC_CH)) {
+                uint16_t v = ADC_GetValue(MIC_PF_ADC_CH);
+                sum += v;
+                if (v < min_v)
+                    min_v = v;
+                if (v > max_v)
+                    max_v = v;
+                samples++;
+                break;
+            }
+        }
+    }
+
+    if (samples > 0) {
+        uint16_t v;
+        if (samples >= 3) {
+            v = (uint16_t)((sum - min_v - max_v) / (samples - 2));
+        } else {
+            v = (uint16_t)(sum / samples);
+        }
+        if (v <= MIC_PF_ADC_PF1_MAX)
+            key = KEY_SIDE2;
+        else if (v >= MIC_PF_ADC_PF2_MIN && v <= MIC_PF_ADC_PF2_MAX)
+            key = KEY_SIDE1;
+
+        if (latched_key != KEY_INVALID) {
+            if (v >= MIC_PF_ADC_RELEASE_MIN) {
+                if (++release_count >= MIC_PF_RELEASE_COUNT) {
+                    latched_key = KEY_INVALID;
+                    release_count = 0;
+                }
+            } else {
+                release_count = 0;
+            }
+            key = latched_key;
+        } else if (key != KEY_INVALID) {
+            latched_key = key;
+            release_count = 0;
+            key = latched_key;
+        }
+    }
+
+    // Restore previous PA7 function (UART1 TX by default)
+    PORTCON_PORTA_SEL0 = sel0;
+
+    return key;
+}
+#endif
+
 KEY_Code_t KEYBOARD_Poll(void) {
 
 #ifdef ENABLE_DOCK
@@ -164,6 +256,14 @@ KEY_Code_t KEYBOARD_Poll(void) {
     // Reset VOICE pins
     GPIO_ClearBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_6);
     GPIO_SetBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_7);
+
+#if defined(ENABLE_MIC_PF)
+    if (Key == KEY_INVALID) {
+        KEY_Code_t pf = KEYBOARD_ReadMicPf();
+        if (pf != KEY_INVALID)
+            Key = pf;
+    }
+#endif
 
     return Key;
 }

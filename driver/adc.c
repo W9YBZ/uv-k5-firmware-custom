@@ -20,6 +20,12 @@
 #include "bsp/dp32g030/saradc.h"
 #include "bsp/dp32g030/syscon.h"
 
+#if defined(ENABLE_MIC_PF)
+#ifndef MIC_PF_ADC_CH
+#define MIC_PF_ADC_CH ADC_CH2
+#endif
+#endif
+
 uint8_t ADC_GetChannelNumber(ADC_CH_MASK Mask) {
     return __builtin_ctz(Mask);
 }
@@ -64,7 +70,7 @@ void ADC_Configure() {
 
     SARADC_CFG = 0
                  | (SARADC_CFG & ~(0
-                                   | SARADC_CFG_CH_SEL_MASK
+                 | SARADC_CFG_CH_SEL_MASK
                                    | SARADC_CFG_AVG_MASK
                                    | SARADC_CFG_CONT_MASK
                                    | SARADC_CFG_SMPL_SETUP_MASK
@@ -74,7 +80,11 @@ void ADC_Configure() {
                                    | SARADC_CFG_ADC_TRIG_MASK
                                    | SARADC_CFG_DMA_EN_MASK
     ))
+#if defined(ENABLE_MIC_PF)
+                 | (((ADC_CH4 | ADC_CH9 | MIC_PF_ADC_CH) << SARADC_CFG_CH_SEL_SHIFT) & SARADC_CFG_CH_SEL_MASK)
+#else
                  | (((ADC_CH4 | ADC_CH9) << SARADC_CFG_CH_SEL_SHIFT) & SARADC_CFG_CH_SEL_MASK)
+#endif
                  | ((SARADC_CFG_AVG_VALUE_8_SAMPLE << SARADC_CFG_AVG_SHIFT) & SARADC_CFG_AVG_MASK)
                  | ((SARADC_CFG_CONT_VALUE_SINGLE<< SARADC_CFG_CONT_SHIFT) & SARADC_CFG_CONT_MASK)
                  | ((SARADC_CFG_SMPL_SETUP_VALUE_1_CYCLE << SARADC_CFG_SMPL_SETUP_SHIFT) & SARADC_CFG_SMPL_SETUP_MASK)
