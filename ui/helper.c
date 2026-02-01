@@ -304,6 +304,44 @@ void UI_PrintStringSmall(const char *pString, uint8_t Start, uint8_t End, uint8_
 #endif
 }
 
+void UI_PrintStringSmallDoubleHeight(const char *pString, uint8_t Start, uint8_t End, uint8_t Line) {
+#ifdef ENABLE_ENGLISH
+    const size_t Length = strlen(pString);
+    size_t       i;
+
+    const unsigned int char_width   = ARRAY_SIZE(gFontSmall[0]);
+    const unsigned int char_spacing = char_width + 1;
+
+    if (End > Start)
+        Start += (((End - Start) - (Length * char_spacing)) + 1) / 2;
+
+    uint8_t *pFb0 = gFrameBuffer[Line] + Start;
+    uint8_t *pFb1 = gFrameBuffer[Line + 1] + Start;
+
+    for (i = 0; i < Length; i++) {
+        if (pString[i] > ' ') {
+            const unsigned int index = (unsigned int)pString[i] - ' ' - 1;
+            if (index < ARRAY_SIZE(gFontSmall)) {
+                const uint8_t *glyph = gFontSmall[index];
+                for (unsigned int col = 0; col < char_width; col++) {
+                    const uint8_t src = glyph[col];
+                    uint16_t dst = 0;
+                    for (unsigned int bit = 0; bit < 8; bit++) {
+                        if (src & (1u << bit))
+                            dst |= (1u << (bit * 2)) | (1u << (bit * 2 + 1));
+                    }
+                    const unsigned int x = (i * char_spacing) + 1 + col;
+                    pFb0[x] = (uint8_t)(dst & 0xFF);
+                    pFb1[x] = (uint8_t)(dst >> 8);
+                }
+            }
+        }
+    }
+#else
+    UI_PrintStringSmall(pString, Start, End, Line);
+#endif
+}
+
 
 void UI_PrintStringSmallBuffer(const char *pString, uint8_t *buffer) {
     size_t i;

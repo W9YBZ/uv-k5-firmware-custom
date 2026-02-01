@@ -654,7 +654,7 @@ void UI_DisplayMain(void) {
 #if ENABLE_CHINESE_FULL == 4&&! defined(ENABLE_ENGLISH)
                             show_move_flag=1;
 #endif
-                            UI_PrintStringSmall(String, 32, 0, line);
+                            UI_PrintStringSmallDoubleHeight(String, 32, 0, line);
                         } else {
 #if ENABLE_CHINESE_FULL == 4 && !defined(ENABLE_ENGLISH)
                             show_move_flag=1;
