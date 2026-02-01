@@ -137,10 +137,10 @@ void SETTINGS_InitEEPROM(void)
 #ifdef ENABLE_MIC_PF
     // 1FE8..1FEF
     EEPROM_ReadBuffer(0x1FE8, Data, 8);
-    gEeprom.MIC_PF1_SHORT_PRESS_ACTION    = (Data[0] < ACTION_OPT_LEN-2) ? Data[0] : ACTION_OPT_WIDTH;
-    gEeprom.MIC_PF1_LONG_PRESS_ACTION     = (Data[1] < ACTION_OPT_LEN) ? Data[1] : ACTION_OPT_A_B;
-    gEeprom.MIC_PF2_SHORT_PRESS_ACTION    = (Data[2] < ACTION_OPT_LEN-2) ? Data[2] : ACTION_OPT_FLASHLIGHT;
-    gEeprom.MIC_PF2_LONG_PRESS_ACTION     = (Data[3] < ACTION_OPT_LEN) ? Data[3] : ACTION_OPT_BLMIN_TMP_OFF;
+        gEeprom.MIC_PF1_SHORT_PRESS_ACTION    = (Data[0] < ACTION_OPT_LEN-2) ? Data[0] : ACTION_OPT_A_B;
+    gEeprom.MIC_PF1_LONG_PRESS_ACTION     = (Data[1] < ACTION_OPT_LEN) ? Data[1] : ACTION_OPT_WIDTH;
+    gEeprom.MIC_PF2_SHORT_PRESS_ACTION    = (Data[2] < ACTION_OPT_LEN-2) ? Data[2] : ACTION_OPT_POWER;
+    gEeprom.MIC_PF2_LONG_PRESS_ACTION     = (Data[3] < ACTION_OPT_LEN) ? Data[3] : ACTION_OPT_FLASHLIGHT;
 #endif
 #endif
 

@@ -30,7 +30,7 @@ Please visit: [K5Web]( https://k5.vicicode.com/)
 
 * The current versions are: **LOSEHUxxx**, **LOSEHUxxxK**, **LOSEHUxxxH**, **LOSEHUxxxE**, **LOSEHUxxxEK**, **LOSEHUxxxHS**
 * Custom build: **W9YBZ_KMC25-PF** (adds KMC-25 style speaker-mic PF1/PF2 buttons via DATA/TX Data resistor ladder)
-* KMC-25 PF menu items: `MPF1S/MPF1L/MPF2S/MPF2L` (defaults: PF1 short=Wide/Narrow, PF1 long=A/B, PF2 short=Flashlight, PF2 long=Backlight)
+* KMC-25 PF menu items: `MPF1S/MPF1L/MPF2S/MPF2L` (defaults: PF1 short=A/B, PF1 long=Wide/Narrow, PF2 short=Power, PF2 long=Flashlight)
 * 
 | Version       | Language | EEPROM Requirement | MDC1200 | Doppler Mode | Spectrum | Radio | Chinese Channel Name | Custom Boot Image | Boot Image | Chinese Input Method | SMS |
 |---------------|----------|---------------------|---------|--------------|----------|-------|----------------------|-------------------|------------|----------------------|-----|
