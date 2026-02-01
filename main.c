@@ -31,6 +31,7 @@
 #include "driver/bk4819.h"
 #include "font.h"
 #include "ui/ui.h"
+#include "ui/menu.h"
 #include <stdint.h>
 #include <string.h>
 #include "font.h"
@@ -180,11 +181,7 @@ void Main(void) {
     AM_fix_init();
 #endif
 
-#if ENABLE_CHINESE_FULL == 0
-    gMenuListCount = 52;
-#else
-    gMenuListCount = 53;
-#endif
+    gMenuListCount = MENU_GetListCount();
     gKeyReading0 = KEY_INVALID;
     gKeyReading1 = KEY_INVALID;
     gDebounceCounter = 0;

@@ -149,6 +149,11 @@ const t_menu_item MenuList[] =
                 {/*"",*/       VOICE_ID_INVALID, 0xff, "\x00"}  // end of list - DO NOT delete or move this this
         };
 
+uint8_t MENU_GetListCount(void)
+{
+    return ARRAY_SIZE(MenuList) - 1;
+}
+
 #ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
 #if ENABLE_CHINESE_FULL==0 || defined(ENABLE_ENGLISH)
 #ifdef ENABLE_ENGLISH

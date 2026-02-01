@@ -150,6 +150,7 @@ enum {
 };
 
 extern const t_menu_item MenuList[];
+uint8_t MENU_GetListCount(void);
 #if ENABLE_CHINESE_FULL == 4
 
 extern const char gSubMenu_PONMSG[3][5];

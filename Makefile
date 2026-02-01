@@ -43,11 +43,11 @@ ENABLE_REDUCE_LOW_MID_TX_POWER?= 0
 ENABLE_BYP_RAW_DEMODULATORS   ?= 0
 ENABLE_BLMIN_TMP_OFF          ?= 0
 ENABLE_SCAN_RANGES            ?= 1
-ENABLE_MDC1200                = 0
+ENABLE_MDC1200                = 1
 ENABLE_MDC1200_SHOW_OP_ARG    = 0
 ENABLE_MDC1200_SIDE_BEEP      = 0
-ENABLE_MDC1200_CONTACT        = 0
-ENABLE_MDC1200_EDIT			  = 0
+ENABLE_MDC1200_CONTACT        = 1
+ENABLE_MDC1200_EDIT			  = 1
 ENABLE_UART_RW_BK_REGS 		  ?= 0
 ENABLE_AUDIO_BAR_DEFAULT      ?= 0
 ENABLE_EEPROM_TYPE        	   = 0
@@ -302,6 +302,10 @@ OBJCOPY = arm-none-eabi-objcopy
 SIZE = arm-none-eabi-size
 
 AUTHOR_STRING ?= LOSEHU
+# Build output directory (tagged per build, defaults to timestamp).
+TIMESTAMP ?= $(shell date +%Y%m%d_%H%M%S)
+OUTPUT_TAG ?= $(TIMESTAMP)
+DIST_DIR ?= dist/$(OUTPUT_TAG)
 # the user might not have/want git installed
 # can set own version string here (max 7 chars)
 ifneq (, $(shell $(WHERE) git))
@@ -314,6 +318,11 @@ endif
 # It is needed for the firmware packing script
 ifeq (, $(VERSION_STRING))
 	VERSION_STRING := NOGIT
+endif
+# Optional short build tag (max 7 chars) to identify custom builds.
+BUILD_TAG ?=
+ifneq ($(BUILD_TAG),)
+	VERSION_STRING := $(BUILD_TAG)
 endif
 #VERSION_STRING := 230930b
 
@@ -625,6 +634,10 @@ else
 	-$(MY_PYTHON) fw-pack.py $(TARGET).bin $(AUTHOR_STRING) $(PACKED_FILE_SUFFIX).bin
 endif
 	$(SIZE) $(TARGET)
+	@mkdir -p $(DIST_DIR)
+	@cp -f $(TARGET) $(DIST_DIR)/$(TARGET)_$(OUTPUT_TAG)
+	@cp -f $(TARGET).bin $(DIST_DIR)/$(TARGET)_$(OUTPUT_TAG).bin
+	@if [ -f "$(PACKED_FILE_SUFFIX).bin" ]; then cp -f "$(PACKED_FILE_SUFFIX).bin" "$(DIST_DIR)/$(PACKED_FILE_SUFFIX)_$(OUTPUT_TAG).bin"; fi
 
 
 
