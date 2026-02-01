@@ -45,6 +45,8 @@ void AUDIO_PlayBeep(BEEP_Type_t Beep) {
         Beep != BEEP_880HZ_200MS &&
         Beep != BEEP_880HZ_500MS &&
         Beep != BEEP_TALK_PREMIT &&     // allow talk-permit tone even if beeps are disabled
+        Beep != BEEP_2TONE_RISE_OPTIONAL &&
+        Beep != BEEP_2TONE_FALL_OPTIONAL &&
         !gEeprom.BEEP_CONTROL)
         return;
 
@@ -102,6 +104,10 @@ void AUDIO_PlayBeep(BEEP_Type_t Beep) {
             // Distinct TX-start (talk-permit) tone.
             ToneFrequency = 940;
             break;
+        case BEEP_2TONE_RISE_OPTIONAL:
+        case BEEP_2TONE_FALL_OPTIONAL:
+            ToneFrequency = 440;
+            break;
     }
 
     BK4819_PlayTone(ToneFrequency, true);
@@ -111,6 +117,47 @@ void AUDIO_PlayBeep(BEEP_Type_t Beep) {
     AUDIO_AudioPathOn();
 
     SYSTEM_DelayMs(60);
+
+    if (Beep == BEEP_2TONE_RISE_OPTIONAL || Beep == BEEP_2TONE_FALL_OPTIONAL) {
+        const uint16_t first = (Beep == BEEP_2TONE_RISE_OPTIONAL) ? 440 : 880;
+        const uint16_t second = (Beep == BEEP_2TONE_RISE_OPTIONAL) ? 880 : 440;
+
+        BK4819_PlayTone(first, true);
+        SYSTEM_DelayMs(2);
+        BK4819_ExitTxMute();
+        SYSTEM_DelayMs(40);
+        BK4819_EnterTxMute();
+        SYSTEM_DelayMs(20);
+
+        BK4819_PlayTone(second, true);
+        SYSTEM_DelayMs(2);
+        BK4819_ExitTxMute();
+        SYSTEM_DelayMs(40);
+        BK4819_EnterTxMute();
+        SYSTEM_DelayMs(20);
+
+        AUDIO_AudioPathOff();
+        SYSTEM_DelayMs(5);
+        BK4819_TurnsOffTones_TurnsOnRX();
+        SYSTEM_DelayMs(5);
+        BK4819_WriteRegister(BK4819_REG_71, ToneConfig);
+
+        if (gEnableSpeaker)
+            AUDIO_AudioPathOn();
+
+#ifdef ENABLE_FMRADIO
+        if (gFmRadioMode)
+            BK1080_Mute(false);
+#endif
+
+        if (gCurrentFunction == FUNCTION_POWER_SAVE && gRxIdleMode)
+            BK4819_Sleep();
+
+#ifdef ENABLE_VOX
+        gVoxResumeCountdown = 80;
+#endif
+        return;
+    }
 
     uint16_t Duration;
     switch (Beep) {

@@ -158,7 +158,7 @@ static BEEP_Type_t ACTION_SelectBeep(const enum ACTION_OPT_t action)
     bool will_enable = false;
 
     if (ACTION_GetToggleWillEnable(action, &will_enable))
-        return will_enable ? BEEP_1KHZ_60MS_OPTIONAL : BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
+        return will_enable ? BEEP_2TONE_RISE_OPTIONAL : BEEP_2TONE_FALL_OPTIONAL;
 
     return BEEP_1KHZ_60MS_OPTIONAL;
 }
