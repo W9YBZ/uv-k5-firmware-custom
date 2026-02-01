@@ -46,6 +46,7 @@
 #include "functions.h"
 #include "misc.h"
 #include "settings.h"
+#include "radio.h"
 #include "ui/inputbox.h"
 #include "ui/ui.h"
 
@@ -124,6 +125,18 @@ static bool ACTION_GetToggleWillEnable(const enum ACTION_OPT_t action, bool *wil
             *will_enable = (gFlashLightState == FLASHLIGHT_OFF);
             return true;
 #endif
+        case ACTION_OPT_A_B: {
+            const uint8_t next_vfo = gEeprom.TX_VFO ^ 1u;
+            *will_enable = (next_vfo == 0); // A = ON, B = OFF
+            return true;
+        }
+        case ACTION_OPT_POWER: {
+            const uint8_t next_power = (gTxVfo->OUTPUT_POWER + 1u) % 3u;
+            if (next_power == OUTPUT_POWER_MID)
+                return false; // neutral beep for MID
+            *will_enable = (next_power == OUTPUT_POWER_HIGH); // High = ON, Low = OFF
+            return true;
+        }
         case ACTION_OPT_MONITOR:
             *will_enable = (gCurrentFunction != FUNCTION_MONITOR);
             return true;
@@ -148,6 +161,9 @@ static bool ACTION_GetToggleWillEnable(const enum ACTION_OPT_t action, bool *wil
             *will_enable = (gEeprom.BACKLIGHT_MIN_STAT == BLMIN_STAT_OFF);
             return true;
 #endif
+        case ACTION_OPT_WIDTH:
+            *will_enable = (gTxVfo->CHANNEL_BANDWIDTH == BANDWIDTH_WIDE); // Narrow = ON, Wide = OFF
+            return true;
         default:
             return false;
     }
