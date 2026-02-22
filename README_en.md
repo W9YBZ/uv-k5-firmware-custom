@@ -33,6 +33,8 @@ Please visit: [K5Web]( https://k5.vicicode.com/)
 * MDF_NAME uses full two-line height for English channel names
 * KMC-25 PF menu items: `MPF1S/MPF1L/MPF2S/MPF2L` (defaults: PF1 short=A/B, PF1 long=Wide/Narrow, PF2 short=Power, PF2 long=Flashlight)
 * Default builds now enable `ENABLE_MIC_PF=1`, so the default packed suffix is **W9YBZ_KMC25-PF**
+* Note: body PTT and speaker-mic PF do not share one GPIO path. Body PTT uses `PC5/PTT`; speaker-mic PF uses the `PA7 (SERIAL_TX)` resistor-ladder ADC path.
+* Known issue record (PTT): when speaker-mic PF is mapped to TX and held, concurrent front-panel key events (for example key-beep related activity) can briefly interrupt TX and retrigger the talk-permit tone; the body PTT path is typically not affected.
 | Version       | Language | EEPROM Requirement | MDC1200 | Doppler Mode | Spectrum | Radio | Chinese Channel Name | Custom Boot Image | Boot Image | Chinese Input Method | SMS |
 |---------------|----------|---------------------|---------|--------------|----------|-------|----------------------|-------------------|------------|----------------------|-----|
 | LOSEHUxxx     | Chinese | No expansion needed  | ✅      | ❌           | ✅       | ✅    | ❌                   | ❌                | ❌         | ❌                   | ❌  |
