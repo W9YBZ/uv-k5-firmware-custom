@@ -33,6 +33,7 @@
 * 增加自定义版本：**W9YBZ_KMC25-PF**（支持 KMC-25 风格手咪外接 PF1/PF2 按键，通过 DATA/TX Data 电阻梯识别）
 * MDF_NAME 模式下英文信道名使用双行高度显示（占满空白行）
 * KMC-25 PF 菜单项：`MPF1S/MPF1L/MPF2S/MPF2L`（默认：PF1短=A/B，PF1长=宽窄带，PF2短=功率，PF2长=手电）
+* 默认编译已启用 `ENABLE_MIC_PF=1`，默认产物后缀为 **W9YBZ_KMC25-PF**
 | 版本         | 语言 | EEPROM 需求 | MDC1200 | 多普勒模式 | 频谱 | 收音机 | 中文信道名 | 自定义开机中文字符 | 开机图片 | 中文输入法 | 短信 |
 |--------------|------|-------------|---------|------------|------|--------|------------|--------------------|----------|------------|------|
 | LOSEHUxxx    | 中文 | 无需扩容    | ✅      | ❌         | ✅   | ✅     | ❌         | ❌                 | ❌       | ❌         | ❌   |
@@ -214,7 +215,7 @@
 | 📱 **MDC1200**                         | [MDC1200](https://github.com/OneOfEleven/uv-k5-firmware-custom)               |
 | ENABLE_MDC1200                         | MDC1200发送功能                                                                   |
 | ENABLE_MDC1200_SHOW_OP_ARG             | MDC显示首尾音参数                                                                    |
-| ENABLE_MDC1200_SIDE_BEEP               | MDC侧音                                                                         |
+| ENABLE_MDC1200_SIDE_BEEP               | 发射MDC1200时本机喇叭同步监听MDC音频（侧音）                                                  |
 | ENABLE_MDC1200_CONTACT                 | MDC联系人                                                                        |
 | 🎛️ **DOCK**                           | [DOCK](https://github.com/nicsure/QuanshengDock)                              |
 | ENABLE_DOCK                            | 允许通过电脑控制手台，无屏幕显示！                                                             |
@@ -242,4 +243,3 @@
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=losehu/uv-k5-firmware-custom&type=Date)](https://star-history.com/#losehu/uv-k5-firmware-custom&Date)
-

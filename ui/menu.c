@@ -83,6 +83,9 @@ const t_menu_item MenuList[] =
                 {/*"BackLt",*/ VOICE_ID_INVALID, MENU_ABR, 自动背光}, // was "ABR"
                 {/*"BLMax",*/  VOICE_ID_INVALID, MENU_ABR_MAX, 背光亮度},
                 {/*"MDCID",*/  VOICE_ID_INVALID, MENU_MDC_ID, MDC_ID},
+#if defined(ENABLE_MDC1200) && defined(ENABLE_MDC1200_SIDE_BEEP)
+                {/*"MDCMon",*/ VOICE_ID_INVALID, MENU_MDC_SIDE_TONE, "MDCMON"},
+#endif
 
                 {/*"Roger",*/  VOICE_ID_INVALID, MENU_ROGER, 首尾音},
                 {/*"TPTone",*/ VOICE_ID_INVALID, MENU_TP_TONE, "TPTone"},
@@ -906,6 +909,10 @@ void UI_DisplayMenu(void) {
 //        case MENU_350EN:
             strcpy(String, gSubMenu_OFF_ON[gSubMenuSelection]);
 
+            break;
+
+        case MENU_MDC_SIDE_TONE:
+            sprintf(String, "%u%%", (unsigned int)gSubMenuSelection * 10u);
             break;
 //        case MENU_SCREN:
 //            strcpy(String, gSubMenu_OFF_ON[gSubMenuSelection]);

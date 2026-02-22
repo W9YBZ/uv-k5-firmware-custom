@@ -89,6 +89,7 @@ enum {
 #endif
 
     MENU_MDC_ID,
+    MENU_MDC_SIDE_TONE,
 
 
     MENU_UPCODE,

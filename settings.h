@@ -243,6 +243,7 @@ typedef struct {
     uint16_t              DTMF_CODE_PERSIST_TIME;
     uint16_t              DTMF_CODE_INTERVAL_TIME;
     bool                  DTMF_SIDE_TONE;
+    uint8_t               MDC1200_SIDE_TONE;
 #ifdef ENABLE_DTMF_CALLING
     bool                  PERMIT_REMOTE_KILL;
 #endif

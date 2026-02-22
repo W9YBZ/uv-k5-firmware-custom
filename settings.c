@@ -115,6 +115,19 @@ void SETTINGS_InitEEPROM(void)
     EEPROM_ReadBuffer(0x0E90, Data, 8);
     gEeprom.BEEP_CONTROL                 = Data[0] & 1;
     gEeprom.TALK_PERMIT_TONE             = (Data[0] == 0xFF) ? true : ((Data[0] & 0x02) == 0);
+    if (Data[3] <= 10) {
+        if (Data[3] == 0 && Data[0] != 0xFF && (Data[0] & 0x04) != 0) {
+            // Backward compatibility: legacy ON/OFF setting had no saved percentage.
+            gEeprom.MDC1200_SIDE_TONE = 5;
+        } else {
+            gEeprom.MDC1200_SIDE_TONE = Data[3];
+        }
+    } else if (Data[0] == 0xFF) {
+        gEeprom.MDC1200_SIDE_TONE = 5;
+    } else {
+        // Backward compatibility with the old ON/OFF MDC monitor bit.
+        gEeprom.MDC1200_SIDE_TONE = (Data[0] & 0x04) ? 5 : 0;
+    }
 
     gEeprom.MDC1200_ID     =((uint16_t) (Data[2] << 8))|((uint16_t)(Data[1] ));
 //    gEeprom.KEY_1_LONG_PRESS_ACTION      = (Data[2] < ACTION_OPT_LEN) ? Data[2] : ACTION_OPT_FLASHLIGHT;
@@ -548,7 +561,8 @@ void SETTINGS_SaveSettings(void)
     EEPROM_WriteBuffer(0x0E78, State,8);
 
     State[0] = (gEeprom.BEEP_CONTROL ? 0x01 : 0x00) |
-               (gEeprom.TALK_PERMIT_TONE ? 0x00 : 0x02);
+               (gEeprom.TALK_PERMIT_TONE ? 0x00 : 0x02) |
+               (gEeprom.MDC1200_SIDE_TONE ? 0x04 : 0x00);
    // State[0] |= 0;//gEeprom.KEY_M_LONG_PRESS_ACTION << 1;
 //    State[1]=(uint8_t)(gEeprom.MDC1200_ID&(0x000000ff));
 //    State[2]=(uint8_t)((gEeprom.MDC1200_ID&0x0000ff00)>>8);
@@ -559,7 +573,7 @@ void SETTINGS_SaveSettings(void)
 
     // State[1] = 0;//gEeprom.KEY_1_SHORT_PRESS_ACTION;
    // State[2] = 0;//gEeprom.KEY_1_LONG_PRESS_ACTION;
-    State[3] = 0;//gEeprom.KEY_2_SHORT_PRESS_ACTION;
+    State[3] = (gEeprom.MDC1200_SIDE_TONE <= 10) ? gEeprom.MDC1200_SIDE_TONE : 10;
     State[4] = 0;//gEeprom.KEY_2_LONG_PRESS_ACTION;
     State[5] = gEeprom.SCAN_RESUME_MODE;
     State[6] = 0;//gEeprom.AUTO_KEYPAD_LOCK;

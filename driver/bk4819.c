@@ -336,12 +336,6 @@ void BK4819_PlayRoger(void) {
     ) {
 
         BK4819_send_MDC1200(MDC1200_OP_CODE_POST_ID, 0x00, gEeprom.MDC1200_ID, false);
-
-#ifdef ENABLE_MDC1200_SIDE_BEEP
-        BK4819_start_tone(880, 10, true, true);
-            SYSTEM_DelayMs(120);
-            BK4819_stop_tones(true);
-#endif
     }
 #endif
 }
@@ -1867,6 +1861,11 @@ void BK4819_stop_tones(const bool tx)
     {
         uint16_t fsk_reg59;
         uint8_t  packet[42];
+#ifdef ENABLE_MDC1200_SIDE_BEEP
+        uint16_t monitor_af_level;
+        uint8_t  local_monitor_percent;
+        bool local_monitor_enabled;
+#endif
 
         // create the MDC1200 packet
         const unsigned int size = MDC1200_encode_single_packet(packet, op, arg, id);
@@ -1887,13 +1886,41 @@ void BK4819_stop_tones(const bool tx)
 //			BK4819_REG_30_ENABLE_RX_DSP    |
         0);
 
-#if 1
+        // Optional local monitor for MDC1200 TX tones.
+#ifdef ENABLE_MDC1200_SIDE_BEEP
+        local_monitor_percent = (gEeprom.MDC1200_SIDE_TONE <= 10) ? (gEeprom.MDC1200_SIDE_TONE * 10) : 100;
+        local_monitor_enabled = local_monitor_percent > 0;
+        if (local_monitor_enabled)
+        {
+            monitor_af_level = BK4819_ReadRegister(BK4819_REG_48);
+            {
+                uint16_t gain2 = (monitor_af_level >> 4) & 0x3fu;
+                uint16_t dac = monitor_af_level & 0x0fu;
+
+                gain2 = (gain2 * local_monitor_percent + 50u) / 100u;
+                dac = (dac * local_monitor_percent + 50u) / 100u;
+
+                if (((monitor_af_level >> 4) & 0x3fu) > 0u && gain2 == 0u)
+                    gain2 = 1u;
+                if ((monitor_af_level & 0x0fu) > 0u && dac == 0u)
+                    dac = 1u;
+
+                BK4819_WriteRegister(BK4819_REG_48,
+                                     (monitor_af_level & ~((uint16_t)(0x3fu << 4) | (uint16_t)(0x0fu << 0))) |
+                                     (gain2 << 4) |
+                                     (dac << 0));
+            }
+            GPIO_SetBit(&GPIOC->DATA, 4);
+            BK4819_SetAF(BK4819_AF_BEEP);
+        }
+        else
+        {
             GPIO_ClearBit(&GPIOC->DATA, 4);
             BK4819_SetAF(BK4819_AF_MUTE);
+        }
 #else
-            // let the user hear the FSK being sent
-            BK4819_SetAF(BK4819_AF_BEEP);
-            GPIO_SetBit(&GPIOC->DATA, 4);
+        GPIO_ClearBit(&GPIOC->DATA, 4);
+        BK4819_SetAF(BK4819_AF_MUTE);
 #endif
 //		SYSTEM_DelayMs(2);
 
@@ -2148,6 +2175,14 @@ void BK4819_stop_tones(const bool tx)
 
         // restore the CTCSS/CDCSS setting
         BK4819_WriteRegister(0x51, css_val);
+
+#ifdef ENABLE_MDC1200_SIDE_BEEP
+        if (local_monitor_enabled)
+        {
+            // restore original local audio level after MDC monitor playback
+            BK4819_WriteRegister(BK4819_REG_48, monitor_af_level);
+        }
+#endif
 
         //BK4819_EnterTxMute();
         BK4819_WriteRegister(0x50, 0xBB20); // 1011 1011 0010 0000

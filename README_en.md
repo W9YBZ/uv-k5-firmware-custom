@@ -32,7 +32,7 @@ Please visit: [K5Web]( https://k5.vicicode.com/)
 * Custom build: **W9YBZ_KMC25-PF** (adds KMC-25 style speaker-mic PF1/PF2 buttons via DATA/TX Data resistor ladder)
 * MDF_NAME uses full two-line height for English channel names
 * KMC-25 PF menu items: `MPF1S/MPF1L/MPF2S/MPF2L` (defaults: PF1 short=A/B, PF1 long=Wide/Narrow, PF2 short=Power, PF2 long=Flashlight)
-* 
+* Default builds now enable `ENABLE_MIC_PF=1`, so the default packed suffix is **W9YBZ_KMC25-PF**
 | Version       | Language | EEPROM Requirement | MDC1200 | Doppler Mode | Spectrum | Radio | Chinese Channel Name | Custom Boot Image | Boot Image | Chinese Input Method | SMS |
 |---------------|----------|---------------------|---------|--------------|----------|-------|----------------------|-------------------|------------|----------------------|-----|
 | LOSEHUxxx     | Chinese | No expansion needed  | ✅      | ❌           | ✅       | ✅    | ❌                   | ❌                | ❌         | ❌                   | ❌  |
@@ -220,7 +220,7 @@ You can customize the firmware by enabling/disabling various compilation options
 | 📱 **MDC1200**                         | [MDC1200](https://github.com/OneOfEleven/uv-k5-firmware-custom)                                                                 |
 | ENABLE_MDC1200                         | MDC1200 transmission function                                                                                                   |
 | ENABLE_MDC1200_SHOW_OP_ARG             | MDC display head/tail parameter                                                                                                 |
-| ENABLE_MDC1200_SIDE_BEEP               | MDC side tone                                                                                                                   |
+| ENABLE_MDC1200_SIDE_BEEP               | Monitor MDC1200 TX audio on the radio speaker (local side tone)                                                                |
 | ENABLE_MDC1200_CONTACT                 | MDC contact                                                                                                                     |
 | 🎛️ **DOCK**                           | [DOCK](https://github.com/nicsure/QuanshengDock)                                                                                |
 | ENABLE_DOCK                            | Allow control of the radio via PC, no screen display!                                                                           |

@@ -282,6 +282,11 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax) {
             *pMax = ARRAY_SIZE(gSubMenu_RX_TX) - 1;
             break;
 
+        case MENU_MDC_SIDE_TONE:
+            *pMin = 0;
+            *pMax = 10;
+            break;
+
 #ifdef ENABLE_AM_FIX_TEST1
             case MENU_AM_FIX_TEST1:
                 *pMin = 0;
@@ -649,6 +654,10 @@ void MENU_AcceptSetting(void) {
         case MENU_TP_TONE:
             gEeprom.TALK_PERMIT_TONE = gSubMenuSelection;
             break;
+        case MENU_MDC_SIDE_TONE:
+            gEeprom.MDC1200_SIDE_TONE = gSubMenuSelection;
+            break;
+
 
         case MENU_TOT:
             gEeprom.TX_TIMEOUT_TIMER = gSubMenuSelection;
@@ -1079,6 +1088,10 @@ void MENU_ShowCurrentSetting(void) {
 
         case MENU_TP_TONE:
             gSubMenuSelection = gEeprom.TALK_PERMIT_TONE;
+            break;
+
+        case MENU_MDC_SIDE_TONE:
+            gSubMenuSelection = gEeprom.MDC1200_SIDE_TONE;
             break;
 
         case MENU_TOT:
