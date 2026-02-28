@@ -36,6 +36,10 @@
 * 默认编译已启用 `ENABLE_MIC_PF=1`，默认产物后缀为 **W9YBZ_KMC25-PF**
 * 说明：机身 PTT 与手咪 PF 不是同一 GPIO 路径。机身 PTT 走 `PC5/PTT`，手咪 PF 通过 `PA7(SERIAL_TX)` 电阻梯 ADC 识别。
 * 已知问题记录（PTT）：当手咪 PF 映射为发射功能并持续按住时，若同时触发机身按键事件（例如按键音），可能出现发射短暂中断并重复触发 Talk Permit Tone；机身 PTT 路径通常不受该现象影响。
+* TX 启动顺序已重构为：`PTT触发 -> TX载波准备 -> Talk Permit -> 起发信令(DTMF_UP/MDC/APOLLO) -> 开麦语音`。
+* Talk Permit 现使用 TX 安全路径播放，不再复用会切回 RX 的普通 `AUDIO_PlayBeep()` 收尾流程。
+* Talk Permit 当前参数（APX 录音拟合）：`920Hz`，时序 `60ms预热 -> 27ms响 -> 20ms停 -> 27ms响 -> 20ms停 -> 49ms响 -> 20ms收尾`。
+* Talk Permit 已优化为“本机可听、TX不中断、空口泄露降低”；受芯片音频链路限制，无法承诺绝对零泄露。
 | 版本         | 语言 | EEPROM 需求 | MDC1200 | 多普勒模式 | 频谱 | 收音机 | 中文信道名 | 自定义开机中文字符 | 开机图片 | 中文输入法 | 短信 |
 |--------------|------|-------------|---------|------------|------|--------|------------|--------------------|----------|------------|------|
 | LOSEHUxxx    | 中文 | 无需扩容    | ✅      | ❌         | ✅   | ✅     | ❌         | ❌                 | ❌       | ❌         | ❌   |
@@ -49,6 +53,29 @@
 - ✅ 表示支持该功能
 - ❌ 表示不支持该功能
 - 表格中的“收音机”功能在 LOSEHUxxxHS 版本中特指 SI4732 收音机
+
+# 本地编译（建议）
+
+如果你在 Docker 内 `/app` 路径和本机路径之间切换过编译，建议先清理依赖文件，避免出现 `No rule to make target '/app/app/mdc1200.h'` 这类旧 `.d` 依赖问题：
+
+```bash
+cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
+find . -type f \( -name "*.o" -o -name "*.d" \) -delete
+```
+
+常用构建命令（英文 + FM + MDC1200）：
+
+```bash
+cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
+make build ENABLE_CHINESE_FULL=0 ENABLE_ENGLISH=1 ENABLE_FMRADIO=1 ENABLE_MDC1200=1 ENABLE_MDC1200_EDIT=1 ENABLE_MDC1200_CONTACT=1
+```
+
+使用当前 Makefile 默认配置构建：
+
+```bash
+cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
+make build
+```
 
 # 多功能的K5/6固件
 

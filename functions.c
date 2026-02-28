@@ -143,15 +143,10 @@ void FUNCTION_PowerSave() {
         GUI_SelectNextDisplay(DISPLAY_MAIN);
 }
 
-void FUNCTION_Transmit() {
-    // if DTMF is enabled when TX'ing, it changes the TX audio filtering !! .. 1of11
-    // // === Play tone at start of TX ===
-    // AUDIO_PlayBeep(BEEP_880HZ_60MS_TRIPLE_BEEP);
-    
+void FUNCTION_Transmit_EnterCarrierOnly(void) {
 #if defined(ENABLE_MESSENGER) || defined(ENABLE_MDC1200)
     enable_msg_rx(false);
 #endif
-
 
     BK4819_DisableDTMF();
 
@@ -193,7 +188,6 @@ void FUNCTION_Transmit() {
 #endif
 
     gUpdateStatus = true;
-
     GUI_DisplayScreen();
 
     RADIO_SetTxParameters();
@@ -201,27 +195,6 @@ void FUNCTION_Transmit() {
     // turn the RED LED on
     BK4819_ToggleGpioOut(BK4819_GPIO5_PIN1_RED, true);
 
-    DTMF_Reply();
-#ifdef ENABLE_MDC1200
-#ifdef ENABLE_MESSENGER
-    if(!stop_mdc_flag){
-#endif
-    if ((gEeprom.ROGER == ROGER_MODE_MDC_HEAD || gEeprom.ROGER == ROGER_MODE_MDC_BOTH ||gEeprom.ROGER == ROGER_MODE_MDC_HEAD_ROGER)
-
-
-        ) {
-        BK4819_send_MDC1200(1, 0x80, gEeprom.MDC1200_ID, true);
-    } else
-#endif
-    if (gCurrentVfo->DTMF_PTT_ID_TX_MODE == PTT_ID_APOLLO)
-        BK4819_PlaySingleTone(2525, 250, 0, gEeprom.DTMF_SIDE_TONE);
-#ifdef ENABLE_MESSENGER
-    #ifdef ENABLE_MDC1200
-
-    }
-    #endif
-
-#endif
 #if defined(ENABLE_ALARM) || defined(ENABLE_TX1750)
     if (gAlarmState != ALARM_STATE_OFF) {
 #ifdef ENABLE_TX1750
@@ -244,14 +217,73 @@ void FUNCTION_Transmit() {
     }
 #endif
 
+    BACKLIGHT_TurnOn();
+
+    // Enter TX with microphone path still closed.
+    BK4819_EnterTxMute();
+    BK4819_SetAF(BK4819_AF_MUTE);
+}
+
+void FUNCTION_Transmit_RunStartupSignaling(void) {
+#if defined(ENABLE_ALARM) || defined(ENABLE_TX1750)
+    if (gAlarmState != ALARM_STATE_OFF)
+        return;
+#endif
+
+    BK4819_DisableScramble();
+
+    DTMF_Reply();
+
+    bool sendApolloTone = (gCurrentVfo->DTMF_PTT_ID_TX_MODE == PTT_ID_APOLLO);
+
+#ifdef ENABLE_MDC1200
+    if (
+#ifdef ENABLE_MESSENGER
+        !stop_mdc_flag &&
+#endif
+        (gEeprom.ROGER == ROGER_MODE_MDC_HEAD ||
+         gEeprom.ROGER == ROGER_MODE_MDC_BOTH ||
+         gEeprom.ROGER == ROGER_MODE_MDC_HEAD_ROGER))
+    {
+        BK4819_send_MDC1200(1, 0x80, gEeprom.MDC1200_ID, true);
+        sendApolloTone = false;
+    }
+#endif
+
+    if (sendApolloTone)
+        BK4819_PlaySingleTone(2525, 250, 0, gEeprom.DTMF_SIDE_TONE);
+
+    // Keep mic closed until FUNCTION_Transmit_OpenMic() runs.
+    BK4819_EnterTxMute();
+    BK4819_SetAF(BK4819_AF_MUTE);
+}
+
+void FUNCTION_Transmit_OpenMic(void) {
+#if defined(ENABLE_ALARM) || defined(ENABLE_TX1750)
+    if (gAlarmState != ALARM_STATE_OFF)
+        return;
+#endif
+
     if (gCurrentVfo->SCRAMBLING_TYPE > 0 && gSetting_ScrambleEnable)
         BK4819_EnableScramble(gCurrentVfo->SCRAMBLING_TYPE - 1);
     else
         BK4819_DisableScramble();
 
-//    if (gSetting_backlight_on_tx_rx & BACKLIGHT_ON_TR_TX) {
-    BACKLIGHT_TurnOn();
-//    }
+    RADIO_SetModulation(gCurrentVfo->Modulation);
+    BK4819_ExitTxMute();
+}
+
+// Legacy combined entry kept for compatibility.
+void FUNCTION_Transmit() {
+    FUNCTION_Transmit_EnterCarrierOnly();
+
+#if defined(ENABLE_ALARM) || defined(ENABLE_TX1750)
+    if (gAlarmState != ALARM_STATE_OFF)
+        return;
+#endif
+
+    FUNCTION_Transmit_RunStartupSignaling();
+    FUNCTION_Transmit_OpenMic();
 }
 
 
@@ -277,7 +309,7 @@ void FUNCTION_Select(FUNCTION_Type_t Function) {
             return;
 
         case FUNCTION_TRANSMIT:
-            FUNCTION_Transmit();
+            FUNCTION_Transmit_EnterCarrierOnly();
             break;
 
         case FUNCTION_MONITOR:

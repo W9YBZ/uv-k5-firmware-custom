@@ -46,6 +46,7 @@ typedef enum BEEP_Type_t BEEP_Type_t;
 extern BEEP_Type_t       gBeepToPlay;
 
 void AUDIO_PlayBeep(BEEP_Type_t Beep);
+void AUDIO_PlayTalkPermitTxSafe(void);
 
 enum
 {

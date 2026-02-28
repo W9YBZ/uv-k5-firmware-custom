@@ -722,6 +722,9 @@ static void CheckRadioInterrupts(void) {
 
 
 void APP_EndTransmission(bool inmediately) {
+    gFlagPrepareTX = false;
+    gTxStartPhase = TX_START_IDLE;
+
     // back to RX mode
     RADIO_SendEndOfTransmission();
     if (gMonitor) {
@@ -733,6 +736,46 @@ void APP_EndTransmission(bool inmediately) {
     } else {
         gRTTECountdown_10ms = gEeprom.REPEATER_TAIL_TONE_ELIMINATION * 10;
     }
+}
+
+static void APP_HandleTxStartPhase(void) {
+    if (gTxStartPhase == TX_START_IDLE)
+        return;
+
+    if (gCurrentFunction != FUNCTION_TRANSMIT) {
+        gTxStartPhase = TX_START_IDLE;
+        return;
+    }
+
+    if (!gPttIsPressed && gTxStartPhase == TX_START_NEED_TPT) {
+        gTxStartPhase = TX_START_IDLE;
+        return;
+    }
+
+    switch (gTxStartPhase) {
+        case TX_START_NEED_TPT:
+            AUDIO_PlayTalkPermitTxSafe();
+            gTxStartPhase = TX_START_NEED_SIGNALING;
+            break;
+
+        case TX_START_NEED_SIGNALING:
+            FUNCTION_Transmit_RunStartupSignaling();
+            gTxStartPhase = TX_START_NEED_OPEN_MIC;
+            break;
+
+        case TX_START_NEED_OPEN_MIC:
+            FUNCTION_Transmit_OpenMic();
+            gTxStartPhase = TX_START_IDLE;
+            break;
+
+        case TX_START_IDLE:
+        default:
+            gTxStartPhase = TX_START_IDLE;
+            break;
+    }
+
+    if (gCurrentFunction != FUNCTION_TRANSMIT)
+        gTxStartPhase = TX_START_IDLE;
 }
 
 #ifdef ENABLE_VOX
@@ -793,6 +836,7 @@ if (gCurrentFunction != FUNCTION_TRANSMIT && !SerialConfigInProgress())
 #ifdef ENABLE_DTMF_CALLING
             gDTMF_ReplyState = DTMF_REPLY_NONE;
 #endif
+            gTxStartPhase = TX_START_NEED_SIGNALING;
             RADIO_PrepareTX();
             gUpdateDisplay = true;
         }
@@ -828,6 +872,8 @@ void APP_Update(void) {
 
     if (gCurrentFunction != FUNCTION_TRANSMIT)
         HandleFunction();
+
+    APP_HandleTxStartPhase();
 
 #ifdef ENABLE_FMRADIO
     //	if (gFmRadioCountdown_500ms > 0)

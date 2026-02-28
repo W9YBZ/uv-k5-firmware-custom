@@ -77,6 +77,14 @@ enum BacklightOnRxTx_t {
     BACKLIGHT_ON_TR_TXRX
 };
 
+enum TX_StartPhase_t {
+    TX_START_IDLE = 0,
+    TX_START_NEED_TPT,
+    TX_START_NEED_SIGNALING,
+    TX_START_NEED_OPEN_MIC
+};
+typedef enum TX_StartPhase_t TX_StartPhase_t;
+
 extern const uint8_t         fm_radio_countdown_500ms;
 extern const uint16_t        fm_play_countdown_scan_10ms;
 extern const uint16_t        fm_play_countdown_noscan_10ms;
@@ -255,6 +263,7 @@ extern bool              gRequestSaveFM;
 #endif
 extern uint8_t               gKeypadLocked;
 extern bool                  gFlagPrepareTX;
+extern TX_StartPhase_t       gTxStartPhase;
 
 extern bool                  gFlagAcceptSetting;   // accept menu setting
 extern bool                  gFlagRefreshSetting;  // refresh menu display

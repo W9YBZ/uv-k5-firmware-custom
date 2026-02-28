@@ -112,6 +112,9 @@ void GENERIC_Key_F(bool bKeyPressed, bool bKeyHeld) {
 void GENERIC_Key_PTT(bool bKeyPressed) {
     gInputBoxIndex = 0;
     if (!bKeyPressed || SerialConfigInProgress()) {    // PTT released
+        gFlagPrepareTX = false;
+        gTxStartPhase = TX_START_IDLE;
+
         if (gCurrentFunction == FUNCTION_TRANSMIT) {    // we are transmitting .. stop
 
 
@@ -202,14 +205,15 @@ void GENERIC_Key_PTT(bool bKeyPressed) {
     DTMF_clear_input_box();
 
     start_tx:
-    // request start TX
-    // Play a short talk-permit tone for immediate TX-start feedback.
-    if (gEeprom.TALK_PERMIT_TONE)
-        AUDIO_PlayBeep(BEEP_TALK_PREMIT);
+    // request start TX and defer startup steps to the TX phase state machine
+    gTxStartPhase = gEeprom.TALK_PERMIT_TONE ? TX_START_NEED_TPT : TX_START_NEED_SIGNALING;
     gFlagPrepareTX = true;
     goto done;
 
     cancel_tx:
+    gFlagPrepareTX = false;
+    gTxStartPhase = TX_START_IDLE;
+
     if (gPttIsPressed) {
         gPttWasPressed = true;
     }

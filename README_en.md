@@ -35,6 +35,10 @@ Please visit: [K5Web]( https://k5.vicicode.com/)
 * Default builds now enable `ENABLE_MIC_PF=1`, so the default packed suffix is **W9YBZ_KMC25-PF**
 * Note: body PTT and speaker-mic PF do not share one GPIO path. Body PTT uses `PC5/PTT`; speaker-mic PF uses the `PA7 (SERIAL_TX)` resistor-ladder ADC path.
 * Known issue record (PTT): when speaker-mic PF is mapped to TX and held, concurrent front-panel key events (for example key-beep related activity) can briefly interrupt TX and retrigger the talk-permit tone; the body PTT path is typically not affected.
+* TX startup order has been refactored to: `PTT trigger -> TX carrier prepare -> Talk Permit -> startup signaling (DTMF_UP/MDC/APOLLO) -> open microphone audio`.
+* Talk Permit now uses a TX-safe playback path instead of the normal `AUDIO_PlayBeep()` RX-restore tail sequence.
+* Current Talk Permit parameters (fitted from APX sample): `920Hz`, cadence `60ms pre-roll -> 27ms on -> 20ms off -> 27ms on -> 20ms off -> 49ms on -> 20ms tail`.
+* Talk Permit is tuned for local audibility, continuous TX, and reduced OTA leakage; due to BK4819 audio-path limits, absolute zero leakage is not guaranteed.
 | Version       | Language | EEPROM Requirement | MDC1200 | Doppler Mode | Spectrum | Radio | Chinese Channel Name | Custom Boot Image | Boot Image | Chinese Input Method | SMS |
 |---------------|----------|---------------------|---------|--------------|----------|-------|----------------------|-------------------|------------|----------------------|-----|
 | LOSEHUxxx     | Chinese | No expansion needed  | ✅      | ❌           | ✅       | ✅    | ❌                   | ❌                | ❌         | ❌                   | ❌  |
@@ -48,6 +52,29 @@ Please visit: [K5Web]( https://k5.vicicode.com/)
 - ✅ means the feature is supported
 - ❌ means the feature is not supported
 - The "Radio" feature in the LOSEHUxxxHS version specifically refers to the SI4732 radio
+
+# Local Build (Recommended)
+
+If you switch between Docker `/app` builds and local-path builds, clear stale dependency files first. This avoids errors like `No rule to make target '/app/app/mdc1200.h'` from old `.d` files:
+
+```bash
+cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
+find . -type f \( -name "*.o" -o -name "*.d" \) -delete
+```
+
+Common build command (English + FM + MDC1200):
+
+```bash
+cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
+make build ENABLE_CHINESE_FULL=0 ENABLE_ENGLISH=1 ENABLE_FMRADIO=1 ENABLE_MDC1200=1 ENABLE_MDC1200_EDIT=1 ENABLE_MDC1200_CONTACT=1
+```
+
+Build with current Makefile defaults:
+
+```bash
+cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
+make build
+```
 
 # Multi-functional K5/6 Firmware
 

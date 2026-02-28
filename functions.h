@@ -38,5 +38,8 @@ void FUNCTION_Init(void);
 void FUNCTION_Select(FUNCTION_Type_t Function);
 bool FUNCTION_IsRx();
 void FUNCTION_Transmit();
+void FUNCTION_Transmit_EnterCarrierOnly(void);
+void FUNCTION_Transmit_RunStartupSignaling(void);
+void FUNCTION_Transmit_OpenMic(void);
 #endif
 

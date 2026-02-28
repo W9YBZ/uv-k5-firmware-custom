@@ -240,6 +240,74 @@ void AUDIO_PlayBeep(BEEP_Type_t Beep) {
 
 }
 
+void AUDIO_PlayTalkPermitTxSafe(void) {
+    const bool restoreAudioPath = gEnableSpeaker;
+    const bool restoreSpeakerState = gEnableSpeaker;
+    const uint16_t toneWord = (uint16_t)((((uint32_t)920u * 1353245u) + (1u << 16)) >> 17);
+    const uint16_t toneEnable = BK4819_REG_70_ENABLE_TONE1 | (64u << BK4819_REG_70_SHIFT_TONE1_TUNING_GAIN);
+    const uint16_t reducedDeviation = 100u; // keep RF leakage lower while retaining local audibility
+    const uint8_t pulseDurationsMs[3] = {27u, 27u, 49u};
+    const uint8_t interPulseGapMs = 20u;
+    const uint8_t tailGapMs = 20u;
+    uint16_t toneConfig;
+    uint16_t toneCtrlConfig;
+    uint16_t deviationConfig;
+    uint8_t pulse;
+
+    if (gCurrentFunction != FUNCTION_TRANSMIT)
+        return;
+
+    toneConfig = BK4819_ReadRegister(BK4819_REG_71);
+    toneCtrlConfig = BK4819_ReadRegister(BK4819_REG_70);
+    deviationConfig = BK4819_ReadRegister(BK4819_REG_40);
+
+#ifdef ENABLE_FMRADIO
+    if (gFmRadioMode)
+        BK1080_Mute(true);
+#endif
+
+    gEnableSpeaker = true;
+    AUDIO_AudioPathOn();
+
+    // Keep carrier active and explicitly enable TX-link path for local monitor.
+    BK4819_EnableTXLink();
+    BK4819_EnterTxMute();
+    BK4819_SetAF(BK4819_AF_BEEP);
+    BK4819_WriteRegister(BK4819_REG_71, toneWord);
+    BK4819_WriteRegister(BK4819_REG_40, (deviationConfig & 0xF000u) | reducedDeviation);
+
+    // Match upstream talk-permit cadence pre-roll.
+    SYSTEM_DelayMs(60);
+
+    BK4819_ExitTxMute();
+    // Fitted to captured TPT_APX.m4a cadence: short-short-long.
+    for (pulse = 0; pulse < 3; pulse++) {
+        BK4819_WriteRegister(BK4819_REG_70, toneEnable);
+        SYSTEM_DelayMs(pulseDurationsMs[pulse]);
+        BK4819_WriteRegister(BK4819_REG_70, 0);
+        SYSTEM_DelayMs((pulse == 2) ? tailGapMs : interPulseGapMs);
+    }
+    BK4819_EnterTxMute();
+
+    AUDIO_AudioPathOff();
+
+    BK4819_WriteRegister(BK4819_REG_70, toneCtrlConfig);
+    BK4819_WriteRegister(BK4819_REG_71, toneConfig);
+    BK4819_WriteRegister(BK4819_REG_40, deviationConfig);
+    BK4819_WriteRegister(BK4819_REG_30, 0xC1FE);
+    BK4819_SetAF(BK4819_AF_MUTE);
+    BK4819_EnterTxMute();
+
+    gEnableSpeaker = restoreSpeakerState;
+    if (restoreAudioPath)
+        AUDIO_AudioPathOn();
+
+#ifdef ENABLE_FMRADIO
+    if (gFmRadioMode)
+        BK1080_Mute(false);
+#endif
+}
+
 #ifdef ENABLE_VOICE
 
 static const uint8_t VoiceClipLengthChinese[58] =

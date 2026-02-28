@@ -175,6 +175,7 @@ bool gRequestSaveSettings;
 bool          gRequestSaveFM;
 #endif
 bool gFlagPrepareTX;
+TX_StartPhase_t gTxStartPhase = TX_START_IDLE;
 
 bool gFlagAcceptSetting;
 bool gFlagRefreshSetting;

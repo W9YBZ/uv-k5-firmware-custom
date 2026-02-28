@@ -585,6 +585,7 @@ static void ACTION_AlarmOr1750(const bool b1750)
     gInputBoxIndex = 0;
 
     gFlagPrepareTX = gAlarmState != ALARM_STATE_OFF;
+    gTxStartPhase = TX_START_IDLE;
 
     if (gScreenToDisplay != DISPLAY_MENU)      // 1of11 .. don't close the menu
         gRequestDisplayScreen = DISPLAY_MAIN;
