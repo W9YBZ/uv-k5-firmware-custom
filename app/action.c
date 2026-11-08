@@ -107,7 +107,11 @@ void (*action_opt_table[])(void) = {
         [ACTION_OPT_BLMIN_TMP_OFF] = &FUNCTION_NOP,
 #endif
 
+#ifdef ENABLE_DTMF_CALLING
         [ACTION_OPT_D_DCD] = &ACTION_D_DCD,
+#else
+        [ACTION_OPT_D_DCD] = &FUNCTION_NOP,
+#endif
         [ACTION_OPT_WIDTH] = &ACTION_WIDTH,
 #ifdef ENABLE_SIDEFUNCTIONS_SEND
         [ACTION_OPT_SEND_CURRENT] = &ACTION_SEND_CURRENT,
@@ -153,9 +157,11 @@ static bool ACTION_GetToggleWillEnable(const enum ACTION_OPT_t action, bool *wil
             *will_enable = !gFmRadioMode;
             return true;
 #endif
+#ifdef ENABLE_DTMF_CALLING
         case ACTION_OPT_D_DCD:
             *will_enable = !gTxVfo->DTMF_DECODING_ENABLE;
             return true;
+#endif
 #ifdef ENABLE_BLMIN_TMP_OFF
         case ACTION_OPT_BLMIN_TMP_OFF:
             *will_enable = (gEeprom.BACKLIGHT_MIN_STAT == BLMIN_STAT_OFF);
@@ -628,12 +634,14 @@ void ACTION_WIDTH(void) {
     gTxVfo->CHANNEL_BANDWIDTH = !gTxVfo->CHANNEL_BANDWIDTH;
 }
 
+#ifdef ENABLE_DTMF_CALLING
 void ACTION_D_DCD(void) {
     gRequestSaveChannel = 1;
 
     gTxVfo->DTMF_DECODING_ENABLE = !gTxVfo->DTMF_DECODING_ENABLE;
     DTMF_clear_RX();
 }
+#endif
 
 #ifdef ENABLE_SIDEFUNCTIONS_SEND
 void ACTION_SEND_CURRENT(void){return;}

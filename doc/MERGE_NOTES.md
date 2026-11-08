@@ -12,11 +12,14 @@
 
 ## 当前可用固件配置
 
-两版均为原装 EEPROM：保留 MIC_PF、自定义侧键、Talk Permit、MDC1200（含联系人/编辑/监听音）、VOX，开启 FM、短信/APRS/送达通知，关闭频谱。
-源码仍包含频谱，通过 ENABLE_SPECTRUM 选择。全部功能同开超过 60KB Flash，不应使用扩大发送区或缩减 bootloader 的方式规避。
-中文版以 -fipa-pta -finline-limit=5 -fmerge-all-constants 做体积优化；后一个选项允许常量存储合并。
-GCC 15.2.0 下中文原始镜像 61436 字节（余 4 字节），英文 59220 字节（余 2220 字节）。
-本次构建不沿用之前关闭 VOX 的 losehu-only 固件。
+用户最终选择：保留 W9YBZ 功能、频谱和 FM，关闭短信/APRS。源码中的短信/APRS 保留，但本轮固件不启用。
+
+英文完整配置：MIC_PF、自定义侧键、Talk Permit、MDC1200（含联系人/编辑/监听音）、VOX、FM、频谱；原装 EEPROM。GCC 15.2.0 原始镜像 61244 字节，剩余 196 字节。
+中文版同配置因内置中文字库超过 60KB Flash 2284 字节，尚无满足全部要求的中文固件。不能使用上一轮“短信开、频谱关”的中文固件冒充本轮结果。
+
+备选中文精简配置（仅供验证，待用户选择）：在上述配置上关闭 VOX 和 DTMF 呼叫，保留手咪 PF、Talk Permit、MDC1200、频谱及 FM。该配置已验证编译通过，原始镜像 59736 字节，剩余 1704 字节；单独输出到 artifacts/zh-compact，不替代完整配置。为支持关闭 DTMF 呼叫，修复 app/action.c 和 ui/main.c 中缺失的条件编译保护，不改变呼叫功能开启时的行为。
+
+本轮不改变 Flash/bootloader 边界，不改变 EEPROM 要求。旧短信版已归档到仓库外 /home/yuhui/software_ws/uv-k5-build-history/merged-sms-23a1835。
 
 复现（仓库根目录）：
 
@@ -25,5 +28,5 @@ docker build -t uvk5-toolchain:alpine3.23 -f scripts/Dockerfile.toolchain script
 docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src" uvk5-toolchain:alpine3.23 sh scripts/build-merged.sh
 ```
 
-构建日志及产物位于 artifacts/en 和 artifacts/zh。firmware 为 ELF、firmware.bin 为原始镜像、W9YBZ*.bin 为打包刷机文件。
+英文构建日志及产物位于 artifacts/en；中文完整配置构建失败日志位于 artifacts/zh/build.log。设置 ZH_COMPACT=1 可单独验证中文精简备选配置。firmware 为 ELF、firmware.bin 为原始镜像、W9YBZ*.bin 为打包刷机文件。
 未进行真实设备的 PTT、手咪电阻梯、射频短信/APRS 及 EEPROM 兼容性测试；原 W9YBZ 文档中的手咪 PF/PTT 已知问题仍保留。
