@@ -330,6 +330,9 @@ void Main(void) {
 #endif
 
 
+    // One startup beep, including when optional key beeps are disabled.
+    AUDIO_PlayBeep(BEEP_880HZ_200MS);
+
     boot_counter_10ms = 250;
 
     while (boot_counter_10ms > 0 || (KEYBOARD_Poll() != KEY_INVALID)) {
