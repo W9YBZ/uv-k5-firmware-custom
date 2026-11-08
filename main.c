@@ -272,7 +272,7 @@ void Main(void) {
     AM_fix_init();
 #endif
 
-    gMenuListCount = MENU_GetListCount();
+    gMenuListCount = UI_MENU_GetMenuCount();
     gKeyReading0 = KEY_INVALID;
     gKeyReading1 = KEY_INVALID;
     gDebounceCounter = 0;

@@ -103,10 +103,7 @@ enum {
 
     MENU_D_PRE,
 #ifdef ENABLE_DTMF_CALLING
-#ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
-
     MENU_D_DCD,
-#endif
     MENU_D_LIST,
 #endif
 
@@ -157,7 +154,6 @@ enum {
 };
 
 extern const t_menu_item MenuList[];
-uint8_t MENU_GetListCount(void);
 #if ENABLE_CHINESE_FULL == 4
 
 extern const char gSubMenu_PONMSG[3][5];
@@ -175,7 +171,6 @@ extern const char        gSubMenu_SFT_D[3][10];//3
 
 extern const char gSubMenu_SFT_D[3][16];//3
 #endif
-#ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
 #if ENABLE_CHINESE_FULL == 0 || defined(ENABLE_ENGLISH)
 #ifdef ENABLE_ENGLISH
 extern const char        gSubMenu_W_N[2][7];//7
@@ -184,7 +179,6 @@ extern const char        gSubMenu_W_N[2][3];//7
 #endif
 #else
 extern const char gSubMenu_W_N[2][5];//7
-#endif
 #endif
 #if ENABLE_CHINESE_FULL != 4 || defined(ENABLE_ENGLISH)
 #ifdef ENABLE_ENGLISH
@@ -304,6 +298,8 @@ extern const t_sidefunction *gSubMenu_SIDEFUNCTIONS;
 extern bool gIsInSubMenu;
 
 extern uint8_t gMenuCursor;
+
+uint8_t UI_MENU_GetMenuCount(void);
 
 extern int32_t gSubMenuSelection;
 
