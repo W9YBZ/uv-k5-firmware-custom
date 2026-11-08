@@ -2,7 +2,23 @@
 
 **语言版本: [English](./README_en.md), [中文](./README.md).**
 
-**This fork adds a talk-permit tone** (short beep when PTT starts TX; plays even if key tones are off).
+**This merged fork preserves W9YBZ speaker-mic PF, MDC1200 local monitor volume, channel-name display and Talk Permit, and adds a single startup beep.**
+
+## Current W9YBZ merged build
+
+This build preserves the W9YBZ KMC-25 PF / Talk Permit customizations and merges updates from losehu/main, retaining both Git histories. See [MERGE_NOTES.md](doc/MERGE_NOTES.md) for merge details (Chinese).
+
+Both language builds include speaker-mic PF buttons, custom side buttons, Talk Permit, MDC1200 (contacts, editing and local monitor volume), full-height channel names, spectrum and FM. SMS/APRS is disabled in both builds. Neither build requires EEPROM expansion.
+
+| Output | Language | VOX | DTMF calling | Flash usage (61440-byte limit) |
+| --- | --- | --- | --- | --- |
+| `W9YBZ_KMC25-PF-ZH.bin` | Chinese | Disabled | Disabled | 59740 bytes; 1700 bytes free |
+| `W9YBZ_KMC25-PF-EN.bin` | English | Enabled | Enabled | 61252 bytes; 188 bytes free |
+
+- **Single startup beep**: normal startup plays one 880Hz beep lasting about 200ms, even when key tones are disabled.
+- **MDC local monitor**: set the volume in `MDCMON` and select MDC beginning/end/both in the Roger menu. The monitor volume setting alone does not enable MDC TX signaling.
+- The Chinese build disables VOX and DTMF calling while retaining MDC1200.
+- The table describes `scripts/build-merged.sh`. Running `make build` directly uses different Makefile defaults. The LOSEHU version table and feature lists below describe other available build options, not features enabled in every current binary.
 
 # [K5Web]( https://k5.vicicode.com/)
 * Supports online firmware functionality compilation, no need to install the compilation environment!!
@@ -32,7 +48,7 @@ Please visit: [K5Web]( https://k5.vicicode.com/)
 * Custom build: **W9YBZ_KMC25-PF** (adds KMC-25 style speaker-mic PF1/PF2 buttons via DATA/TX Data resistor ladder)
 * MDF_NAME uses full two-line height for English channel names
 * KMC-25 PF menu items: `MPF1S/MPF1L/MPF2S/MPF2L` (defaults: PF1 short=A/B, PF1 long=Wide/Narrow, PF2 short=Power, PF2 long=Flashlight)
-* Default builds now enable `ENABLE_MIC_PF=1`, so the default packed suffix is **W9YBZ_KMC25-PF**
+* Default builds now enable `ENABLE_MIC_PF=1`, and name the packed output **W9YBZ_KMC25-PF-ZH** or **W9YBZ_KMC25-PF-EN** according to language
 * Note: body PTT and speaker-mic PF do not share one GPIO path. Body PTT uses `PC5/PTT`; speaker-mic PF uses the `PA7 (SERIAL_TX)` resistor-ladder ADC path.
 * Known issue record (PTT): when speaker-mic PF is mapped to TX and held, concurrent front-panel key events (for example key-beep related activity) can briefly interrupt TX and retrigger the talk-permit tone; the body PTT path is typically not affected.
 * TX startup order has been refactored to: `PTT trigger -> TX carrier prepare -> Talk Permit -> startup signaling (DTMF_UP/MDC/APOLLO) -> open microphone audio`.
@@ -55,26 +71,19 @@ Please visit: [K5Web]( https://k5.vicicode.com/)
 
 # Local Build (Recommended)
 
-If you switch between Docker `/app` builds and local-path builds, clear stale dependency files first. This avoids errors like `No rule to make target '/app/app/mdc1200.h'` from old `.d` files:
+From the repository root, use the GCC 15.2.0 Docker toolchain to build the verified Chinese and English profiles sequentially:
 
 ```bash
-cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
-find . -type f \( -name "*.o" -o -name "*.d" \) -delete
+docker build -t uvk5-toolchain:alpine3.23 -f scripts/Dockerfile.toolchain scripts
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src" uvk5-toolchain:alpine3.23 sh scripts/build-merged.sh
 ```
 
-Common build command (English + FM + MDC1200):
+Outputs and full logs are saved under `artifacts/zh/` and `artifacts/en/`:
 
-```bash
-cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
-make build ENABLE_CHINESE_FULL=0 ENABLE_ENGLISH=1 ENABLE_FMRADIO=1 ENABLE_MDC1200=1 ENABLE_MDC1200_EDIT=1 ENABLE_MDC1200_CONTACT=1
-```
+- `W9YBZ_KMC25-PF-ZH.bin` / `W9YBZ_KMC25-PF-EN.bin`: packed firmware for flashing.
+- `firmware.bin`: raw image; `firmware`: ELF; `build.log`: build log.
 
-Build with current Makefile defaults:
-
-```bash
-cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
-make build
-```
+The script cleans old objects and dependency files. Do not build different configurations concurrently in the same directory. Both profiles pass compilation and packed CRC checks; the startup beep has not yet been tested on hardware. The speaker-mic PF/PTT known issue is documented below.
 
 # Multi-functional K5/6 Firmware
 

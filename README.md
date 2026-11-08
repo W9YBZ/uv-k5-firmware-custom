@@ -5,6 +5,22 @@
 
 **这个融合版本保留 W9YBZ 的 KMC-25 PF、MDC1200 本地监听音量、信道名显示和 Talk permit tone**（PTT开始发射时提示音，按键音关闭也会播放）。
 
+## 当前 W9YBZ 融合版
+
+基于 W9YBZ 的 KMC-25 PF / Talk Permit 定制版本，合入 losehu/main 的更新；两侧提交历史均保留。详细合并记录见 [MERGE_NOTES.md](doc/MERGE_NOTES.md)。
+
+两版均保留手咪 PF、自定义侧键、Talk Permit、MDC1200（含联系人、编辑和本地监听音量）、双行高度信道名、频谱和 FM，均关闭短信/APRS，无需扩容 EEPROM。
+
+| 构建产物 | 语言 | VOX | DTMF 呼叫 | Flash 占用（上限 61440 字节） |
+| --- | --- | --- | --- | --- |
+| `W9YBZ_KMC25-PF-ZH.bin` | 中文 | 关闭 | 关闭 | 59740 字节，剩余 1700 字节 |
+| `W9YBZ_KMC25-PF-EN.bin` | 英文 | 开启 | 开启 | 61252 字节，剩余 188 字节 |
+
+- **单声开机音**：正常开机时播放一次约 200ms 的 880Hz“嘟”声，关闭按键音也会播放。
+- **MDC 本地监听**：在 `MDCMON` 中设置音量，并在“首尾音 / Roger”中选择 MDC 首音、尾音或首尾音；仅设置监听音量不会自动启用 MDC 发射信令。
+- 中文版关闭的是 VOX 和 DTMF 呼叫，MDC1200 功能保留。
+- 上表对应 `scripts/build-merged.sh` 的配置；直接执行 `make build` 使用 Makefile 默认值，功能组合不同。下方 LOSEHU 版本表及功能列表为其他可选构建的参考，不代表本轮固件全部启用。
+
 # [K5Web]( https://k5.vicicode.com/)
 * 支持在线固件功能编译，无需安装编译环境！！
 * 多普勒卫星、开机图片文字、SI4732 SSB补丁的写频方式！
@@ -37,7 +53,7 @@
 * 增加自定义版本：**W9YBZ_KMC25-PF**（支持 KMC-25 风格手咪外接 PF1/PF2 按键，通过 DATA/TX Data 电阻梯识别）
 * MDF_NAME 模式下英文信道名使用双行高度显示（占满空白行）
 * KMC-25 PF 菜单项：`MPF1S/MPF1L/MPF2S/MPF2L`（默认：PF1短=A/B，PF1长=宽窄带，PF2短=功率，PF2长=手电）
-* 默认编译已启用 `ENABLE_MIC_PF=1`，默认产物后缀为 **W9YBZ_KMC25-PF**
+* 默认编译已启用 `ENABLE_MIC_PF=1`，产物按语言命名为 **W9YBZ_KMC25-PF-ZH** 或 **W9YBZ_KMC25-PF-EN**
 * 说明：机身 PTT 与手咪 PF 不是同一 GPIO 路径。机身 PTT 走 `PC5/PTT`，手咪 PF 通过 `PA7(SERIAL_TX)` 电阻梯 ADC 识别。
 * 已知问题记录（PTT）：当手咪 PF 映射为发射功能并持续按住时，若同时触发机身按键事件（例如按键音），可能出现发射短暂中断并重复触发 Talk Permit Tone；机身 PTT 路径通常不受该现象影响。
 * TX 启动顺序已重构为：`PTT触发 -> TX载波准备 -> Talk Permit -> 起发信令(DTMF_UP/MDC/APOLLO) -> 开麦语音`。
@@ -60,26 +76,19 @@
 
 # 本地编译（建议）
 
-如果你在 Docker 内 `/app` 路径和本机路径之间切换过编译，建议先清理依赖文件，避免出现 `No rule to make target '/app/app/mdc1200.h'` 这类旧 `.d` 依赖问题：
+在仓库根目录使用 GCC 15.2.0 的 Docker 工具链，串行构建已验证的中英文配置：
 
 ```bash
-cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
-find . -type f \( -name "*.o" -o -name "*.d" \) -delete
+docker build -t uvk5-toolchain:alpine3.23 -f scripts/Dockerfile.toolchain scripts
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src" uvk5-toolchain:alpine3.23 sh scripts/build-merged.sh
 ```
 
-常用构建命令（英文 + FM + MDC1200）：
+产物及完整日志分别保存在 `artifacts/zh/` 和 `artifacts/en/`：
 
-```bash
-cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
-make build ENABLE_CHINESE_FULL=0 ENABLE_ENGLISH=1 ENABLE_FMRADIO=1 ENABLE_MDC1200=1 ENABLE_MDC1200_EDIT=1 ENABLE_MDC1200_CONTACT=1
-```
+- `W9YBZ_KMC25-PF-ZH.bin` / `W9YBZ_KMC25-PF-EN.bin`：已打包刷机文件。
+- `firmware.bin`：未打包原始镜像；`firmware`：ELF 文件；`build.log`：构建日志。
 
-使用当前 Makefile 默认配置构建：
-
-```bash
-cd /home/w9ybz/radio_ws/uv-k5-firmware-custom-src
-make build
-```
+构建脚本会清理旧对象及依赖文件，请勿在同一目录并行运行不同配置。中英文编译及打包 CRC 校验已通过；开机音尚未上机试听。手咪 PF/PTT 已知问题见下文。
 
 # 多功能的K5/6固件
 
