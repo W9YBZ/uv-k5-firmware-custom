@@ -52,6 +52,8 @@ extern KEY_Code_t gKeyReading1;
 extern uint16_t   gDebounceCounter;
 extern bool       gWasFKeyPressed;
 
+// Matrix keys only: external mic PF must not block startup.
+KEY_Code_t KEYBOARD_PollPhysical(void);
 KEY_Code_t KEYBOARD_Poll(void);
 KEY_Code_t GetKey() ;
 #ifdef ENABLE_DOCK

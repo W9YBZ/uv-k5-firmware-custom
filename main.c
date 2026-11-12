@@ -137,7 +137,7 @@ static void MIC_PF_DebugLoop(void) {
     ST7565_BlitFullScreen();
 
     while (1) {
-        if (KEYBOARD_Poll() == KEY_EXIT)
+        if (KEYBOARD_PollPhysical() == KEY_EXIT)
             break;
 
         uint32_t sel0 = PORTCON_PORTA_SEL0;
@@ -312,7 +312,7 @@ void Main(void) {
     UI_DisplayWelcome();
 
 #if defined(ENABLE_MIC_PF)
-    if (KEYBOARD_Poll() == KEY_F) {
+    if (KEYBOARD_PollPhysical() == KEY_F) {
         MIC_PF_DebugLoop();
     }
 #endif
@@ -320,7 +320,7 @@ void Main(void) {
 #ifdef ENABLE_BOOTLOADER
 
 
-    if(KEYBOARD_Poll() == KEY_MENU)
+    if(KEYBOARD_PollPhysical() == KEY_MENU)
 {
             for (int i = 0; i < 10*1024; i += 4) {
                 uint32_t c;
@@ -334,9 +334,9 @@ void Main(void) {
 
     boot_counter_10ms = 250;
 
-    while (boot_counter_10ms > 0 || (KEYBOARD_Poll() != KEY_INVALID)) {
+    while (boot_counter_10ms > 0 || (KEYBOARD_PollPhysical() != KEY_INVALID)) {
 
-        if (KEYBOARD_Poll() == KEY_EXIT
+        if (KEYBOARD_PollPhysical() == KEY_EXIT
 #if ENABLE_CHINESE_FULL == 4
             || gEeprom.POWER_ON_DISPLAY_MODE == POWER_ON_DISPLAY_MODE_NONE
 #endif

@@ -12,10 +12,11 @@ Both language builds include speaker-mic PF buttons, custom side buttons, Talk P
 
 | Output | Language | VOX | DTMF calling | Flash usage (61440-byte limit) |
 | --- | --- | --- | --- | --- |
-| `W9YBZ_KMC25-PF-ZH.bin` | Chinese | Disabled | Disabled | 59760 bytes; 1680 bytes free |
-| `W9YBZ_KMC25-PF-EN.bin` | English | Enabled | Enabled | 61272 bytes; 168 bytes free |
+| `W9YBZ_KMC25-PF-ZH.bin` | Chinese | Disabled | Disabled | 59792 bytes; 1648 bytes free |
+| `W9YBZ_KMC25-PF-EN.bin` | English | Enabled | Enabled | 61304 bytes; 136 bytes free |
 
 - **Single startup beep**: after startup initialization finishes and the main screen replaces the welcome screen, one 880Hz beep plays for about 200ms, even when key tones are disabled.
+- **Speaker-mic startup compatibility**: startup key-release checks use only the body keypad, excluding mic PF ADC input. During normal operation, PF input must first show two consecutive released readings before accepting a press.
 - **MDC local monitor**: set the volume in `MDCMON` and select MDC beginning/end/both in the Roger menu. The monitor volume setting alone does not enable MDC TX signaling.
 - The Chinese build disables VOX and DTMF calling while retaining MDC1200.
 - The table describes `scripts/build-merged.sh`. Running `make build` directly uses different Makefile defaults. The LOSEHU version table and feature lists below describe other available build options, not features enabled in every current binary.

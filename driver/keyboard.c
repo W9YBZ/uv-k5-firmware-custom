@@ -127,6 +127,7 @@ static KEY_Code_t KEYBOARD_ReadMicPf(void) {
     KEY_Code_t key = KEY_INVALID;
     static KEY_Code_t latched_key = KEY_INVALID;
     static uint8_t release_count = 0;
+    static bool released_since_boot = false;
 
     if (SerialConfigInProgress())
         return KEY_INVALID;
@@ -161,6 +162,20 @@ static KEY_Code_t KEYBOARD_ReadMicPf(void) {
         } else {
             v = (uint16_t)(sum / samples);
         }
+        // An accessory already pulling PA7 low at power-on is not a press.
+        // Require a stable released ladder before enabling mic PF actions.
+        if (!released_since_boot) {
+            if (v >= MIC_PF_ADC_RELEASE_MIN) {
+                if (++release_count >= MIC_PF_RELEASE_COUNT) {
+                    released_since_boot = true;
+                    release_count = 0;
+                }
+            } else {
+                release_count = 0;
+            }
+            goto restore_port;
+        }
+
         if (v <= MIC_PF_ADC_PF1_MAX)
             key = KEY_MIC_PF1;
         else if (v >= MIC_PF_ADC_PF2_MIN && v <= MIC_PF_ADC_PF2_MAX)
@@ -183,6 +198,7 @@ static KEY_Code_t KEYBOARD_ReadMicPf(void) {
         }
     }
 
+restore_port:
     // Restore previous PA7 function (UART1 TX by default)
     PORTCON_PORTA_SEL0 = sel0;
 
@@ -190,7 +206,7 @@ static KEY_Code_t KEYBOARD_ReadMicPf(void) {
 }
 #endif
 
-KEY_Code_t KEYBOARD_Poll(void) {
+KEY_Code_t KEYBOARD_PollPhysical(void) {
 
 #ifdef ENABLE_DOCK
     if(gSimulateKey != KEY_INVALID)
@@ -257,6 +273,11 @@ KEY_Code_t KEYBOARD_Poll(void) {
     GPIO_ClearBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_6);
     GPIO_SetBit(&GPIOA->DATA, GPIOA_PIN_KEYBOARD_7);
 
+    return Key;
+}
+
+KEY_Code_t KEYBOARD_Poll(void) {
+    KEY_Code_t Key = KEYBOARD_PollPhysical();
 #if defined(ENABLE_MIC_PF)
     if (Key == KEY_INVALID) {
         KEY_Code_t pf = KEYBOARD_ReadMicPf();
