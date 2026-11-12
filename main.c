@@ -32,6 +32,7 @@
 #include "font.h"
 #include "ui/ui.h"
 #include "ui/menu.h"
+#include "ui/status.h"
 #include <stdint.h>
 #include <string.h>
 #include "font.h"
@@ -95,6 +96,7 @@
 #include "ui/lock.h"
 #include "ui/welcome.h"
 #include "ui/menu.h"
+#include "ui/status.h"
 #include "driver/eeprom.h"
 #include "driver/st7565.h"
 
@@ -330,9 +332,6 @@ void Main(void) {
 #endif
 
 
-    // One startup beep, including when optional key beeps are disabled.
-    AUDIO_PlayBeep(BEEP_880HZ_200MS);
-
     boot_counter_10ms = 250;
 
     while (boot_counter_10ms > 0 || (KEYBOARD_Poll() != KEY_INVALID)) {
@@ -392,6 +391,12 @@ void Main(void) {
 #ifdef ENABLE_NOAA
     RADIO_ConfigureNOAA();
 #endif
+
+    // Startup is complete: render the main screen before the ready beep.
+    GUI_DisplayScreen();
+    gUpdateDisplay = false;
+    UI_DisplayStatus();
+    AUDIO_PlayBeep(BEEP_880HZ_200MS);
 
     while (1) {
 

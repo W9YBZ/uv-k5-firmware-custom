@@ -14,8 +14,8 @@
 
 用户最终选择：保留 W9YBZ 功能、频谱和 FM，关闭短信/APRS。源码中的短信/APRS 保留，但本轮固件不启用。
 
-英文完整配置：MIC_PF、自定义侧键、Talk Permit、MDC1200（含联系人/编辑/监听音）、VOX、FM、频谱；原装 EEPROM。GCC 15.2.0 原始镜像 61252 字节，剩余 188 字节。
-中文最终配置（已获用户确认）：关闭 VOX 和 DTMF 呼叫，保留手咪 PF、Talk Permit、MDC1200（含联系人/编辑/监听音）、频谱及 FM，关闭短信/APRS，使用原装 EEPROM。原始镜像 59740 字节，剩余 1700 字节；正式输出到 artifacts/zh。
+英文完整配置：MIC_PF、自定义侧键、Talk Permit、MDC1200（含联系人/编辑/监听音）、VOX、FM、频谱；原装 EEPROM。GCC 15.2.0 原始镜像 61272 字节，剩余 168 字节。
+中文最终配置（已获用户确认）：关闭 VOX 和 DTMF 呼叫，保留手咪 PF、Talk Permit、MDC1200（含联系人/编辑/监听音）、频谱及 FM，关闭短信/APRS，使用原装 EEPROM。原始镜像 59760 字节，剩余 1680 字节；正式输出到 artifacts/zh。
 为支持关闭 DTMF 呼叫，修复 app/action.c 和 ui/main.c 中缺失的条件编译保护，不改变呼叫功能开启时的行为。英文版保留 VOX 和 DTMF 呼叫。
 
 本轮不改变 Flash/bootloader 边界，不改变 EEPROM 要求。旧短信版已归档到仓库外 /home/yuhui/software_ws/uv-k5-build-history/merged-sms-23a1835。
@@ -32,4 +32,4 @@ docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src" uvk5-toolchain:alpine3
 
 ## 开机提示音
 
-正常开机显示欢迎画面后播放一次 880Hz、约 200ms 的单声提示音，独立于按键音开关，复用现有本地蜂鸣音流程。手咪调试与自定义引导分支在此之前处理。中英文均启用，不改变此前确认的功能配置。
+启动初始化和欢迎画面等待完成、可选开机密码流程结束、主界面及状态栏绘制完成后，播放一次 880Hz、约 200ms 的单声就绪提示音，独立于按键音开关，复用现有本地蜂鸣音流程。手咪调试与自定义引导分支在此之前处理。中英文均启用，不改变此前确认的功能配置。
