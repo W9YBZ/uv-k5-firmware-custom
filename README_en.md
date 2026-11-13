@@ -21,6 +21,14 @@ Both language builds include speaker-mic PF buttons, custom side buttons, Talk P
 - The Chinese build disables VOX and DTMF calling while retaining MDC1200.
 - The table describes `scripts/build-merged.sh`. Running `make build` directly uses different Makefile defaults. The LOSEHU version table and feature lists below describe other available build options, not features enabled in every current binary.
 
+## MPF1 connector contact issue (user verified, 2026-11-13)
+
+The reported case where MPF2 worked but MPF1 did not has been resolved by the user: the structure above the speaker-mic socket caught the plug, causing poor contact and additional contact resistance. PF buttons use an ADC resistor ladder, so additional resistance can move a button reading outside its recognition range.
+
+For similar symptoms, first check whether the structure above the socket obstructs the plug, whether it is fully seated, and whether contact is reliable. If the problem persists, hold the body F key during startup to open `MIC PF ADC`, compare the released and MPF1-pressed readings, and check the `MPF1S` / `MPF1L` assignments.
+
+This records the hardware contact cause of this particular MPF1 failure. No firmware, ADC threshold or PF configuration changes were made during this investigation. The earlier software fix preventing mic input from blocking startup remains in place.
+
 # [K5Web]( https://k5.vicicode.com/)
 * Supports online firmware functionality compilation, no need to install the compilation environment!!
 * Doppler satellite, boot image text, SI4732 SSB patch frequency writing method!
