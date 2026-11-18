@@ -334,7 +334,8 @@ void Main(void) {
 
     boot_counter_10ms = 250;
 
-    while (boot_counter_10ms > 0 || (KEYBOARD_PollPhysical() != KEY_INVALID)) {
+    // Special boot keys were handled above; ordinary held keys must not stall startup.
+    while (boot_counter_10ms > 0) {
 
         if (KEYBOARD_PollPhysical() == KEY_EXIT
 #if ENABLE_CHINESE_FULL == 4
