@@ -108,41 +108,46 @@ def generate(flags_path, output):
         (output / name).write_bytes(data)
         records.append({'offset': address, 'length': len(data), 'file': name,
                         'sha256': hashlib.sha256(data).hexdigest()})
-    manifest = {'eeprom_bytes': SIZE, 'menu_count': count, 'menu_bank': MENU_BASE,
+    version = next(t.split('=', 1)[1] for t in shlex.split(flags_path.read_text()) if t.startswith('-DPACKED_FILE_SUFFIX='))
+    manifest = {'firmware_version': version, 'eeprom_bytes': SIZE, 'menu_count': count, 'menu_bank': MENU_BASE,
                 'font_format': '11x12, 6763 GB2312 simplified glyphs, column/page LSB-first',
                 'resources': records}
     (output / 'resources.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
     print(f'4M resources: {count} menus, complete GB2312 and ASCII fonts, CTCSS/DCS tables')
     return manifest
 
-def merge_backup(backup, assets, destination):
-    def require(condition, message):
-        if not condition:
-            raise ValueError(message)
-    original = Path(backup).read_bytes()
-    if len(original) != SIZE:
-        raise ValueError('A complete 524288-byte 4Mbit EEPROM backup is required; 64KiB dumps are not accepted')
-    manifest = json.loads((Path(assets) / 'resources.json').read_text())
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+def load_resources(assets):
+    assets = Path(assets)
+    manifest = json.loads((assets / 'resources.json').read_text())
     require(manifest['eeprom_bytes'] == SIZE, 'Wrong EEPROM size in manifest')
     require(0 < manifest['menu_count'] <= 128 and manifest['menu_bank'] == MENU_BASE, 'Invalid menu bank/count')
     allowed = {0x2480: 1072, 0x2C00: 308, 0x2E00: 111590, MENU_BASE: manifest['menu_count'] * 14}
-    patched = bytearray(original)
-    seen = set()
+    resources = {}
     for record in manifest['resources']:
         address, length = record['offset'], record['length']
-        require(address not in seen and allowed.get(address) == length and address + length <= SIZE, 'Invalid or duplicate resource range')
-        seen.add(address)
-        path = Path(assets) / record['file']
-        require(path.resolve().parent == Path(assets).resolve(), 'Resource must be inside the asset directory')
+        require(address not in resources and allowed.get(address) == length, 'Invalid or duplicate resource range')
+        path = assets / record['file']
+        require(path.resolve().parent == assets.resolve(), 'Resource must be inside the asset directory')
         data = path.read_bytes()
         require(len(data) == length and hashlib.sha256(data).hexdigest() == record['sha256'], 'Resource length/hash mismatch')
-        patched[address:address+length] = data
-    require(seen == set(allowed) and patched[:0x2000] == original[:0x2000], 'Missing resources or changed settings')
-    # Verify every gap, not just the channel/calibration area.
+        resources[address] = data
+    require(set(resources) == set(allowed), 'Missing resources')
+    return manifest, resources
+
+def merge_backup(backup, assets, destination):
+    original = Path(backup).read_bytes()
+    require(len(original) == SIZE, 'A complete 524288-byte 4Mbit EEPROM backup is required; 64KiB dumps are not accepted')
+    _, resources = load_resources(assets)
+    patched = bytearray(original)
     previous = 0
-    for address, length in sorted(allowed.items()):
+    for address, data in sorted(resources.items()):
+        patched[address:address+len(data)] = data
         require(patched[previous:address] == original[previous:address], 'Changed bytes outside resource ranges')
-        previous = address + length
+        previous = address + len(data)
     require(patched[previous:] == original[previous:], 'Changed bytes outside resource ranges')
     with Path(destination).open('xb') as stream:
         stream.write(patched)

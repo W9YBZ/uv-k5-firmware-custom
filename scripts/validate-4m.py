@@ -57,6 +57,7 @@ def validate(profile):
     assert decoded[:8192] + decoded[8208:] == raw
     assets = directory / 'eeprom-assets'
     resources = json.loads((assets / 'resources.json').read_text())
+    assert resources['firmware_version'] == suffix
     assert resources['eeprom_bytes'] == 524288 and resources['menu_bank'] == 0x7F000
     assert 0 < resources['menu_count'] <= 128
     expected_resources = {0x2480: 1072, 0x2C00: 308, 0x2E00: 111590, 0x7F000: resources['menu_count'] * 14}
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     elif len(sys.argv) == 1:
         results = [validate(profile) for profile in PROFILES]
         (BASE / 'manifest.json').write_text(json.dumps(results, ensure_ascii=False, indent=2) + '\n')
-        files = [BASE / 'manifest.json', ROOT / 'scripts/eeprom-4m-assets.py', ROOT / 'doc/FIRMWARE_4M.md']
+        files = [BASE / 'manifest.json', ROOT / 'scripts/eeprom-4m-assets.py', ROOT / 'scripts/radio-4m.py', ROOT / 'doc/FIRMWARE_4M.md']
         with zipfile.ZipFile(BASE / 'W9YBZ-4M-Chinese.zip', 'w', zipfile.ZIP_DEFLATED) as bundle:
             sums = []
             for path in files:

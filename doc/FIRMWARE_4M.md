@@ -14,25 +14,74 @@
 
 英文继续使用原有 standard/call/messaging 英文固件；这些英文配置也适用于 4M EEPROM，无需本页字库补丁。
 
-## 字库未知时的准备顺序
+## 字库写入：使用配套串口工具
 
-这些是离线编译及校验通过的构建，尚未在本机电台验证。**4M 中文固件依赖本包资源，字库未知时不要只刷固件。** 原 losehu K/H 字库即使存在，也不等于匹配本版新增菜单。需先确认实际 EEPROM 型号及写入工具支持完整 512KiB 和高地址；当前驱动使用 I²C 控制字节的分区位加 16 位字地址，不以容量相同推定所有芯片兼容。
+K5Web 当前按固件名称匹配协议，未识别本分支的 `W9-4M-…` 名称，因此其字库页可能提示“固件版本不匹配”。即使绕过版本识别，网页的自动字库也没有本版 `0x7F000` 菜单资源。不要靠改名冒充 losehu K/H 来直接写入网页字库。
 
-1. 用支持该电台/芯片的工具读取并保存**本机完整 524288 字节 EEPROM 备份**，另存一份原始备份。普通 8KiB 或 64KiB 写频备份不够。本仓库脚本只处理文件，不读取电台。
-2. 解压 `W9YBZ-4M-Chinese.zip`，选择一个配置，将它的资源合并到自己的备份中，例如 spectrum：
+依据：[K5Web 版本识别代码](https://k5.vicicode.com/assets/default-layout.2fa33053.js)、[字库页写入代码](https://k5.vicicode.com/assets/index.eb10a14f.js)。这是对当前已部署代码的检查，网站后续可能变化。
 
-   ```sh
-   python3 eeprom-4m-assets.py apply \
-     --backup /path/to/my-radio-512KiB.bin \
-     --assets spectrum/zh/eeprom-assets \
-     --output /path/to/my-radio-spectrum-512KiB.bin
-   ```
+本包新增 `radio-4m.py`，直接使用本仓库固件已有的串口命令，不需要网页识别固件名称。工具仅适用于本包三种 W9-4M 固件及已确认兼容的 512KiB EEPROM，当前仍只有离线协议模拟测试，尚未上机验证。原驱动使用 I²C 控制字节分区位加 16 位字地址，不以容量相同推定所有芯片兼容。
 
-   在源码目录操作时，脚本路径为 `scripts/eeprom-4m-assets.py`，资源路径为 `artifacts/4m/spectrum/zh/eeprom-assets`。输出必须是不存在的新文件；脚本不覆盖原始备份，并校验资源长度、范围和 SHA256。
-3. 使用兼容的工具写入合并后的 EEPROM 数据并读回比对，再刷**同一配置目录**下已打包的固件。具体写入方法取决于 EEPROM 型号、引导程序和工具；本包不提供自动写入电台的命令。
-4. 验证中文菜单/中文信道名、FM、CTCSS/DCS 收发、MDC、手咪 PF 和所选版本功能。切换三种 4M 中文配置时，也要更新该配置的 `menu-names.bin`；其菜单数量/顺序可能不同。
+### 连接和依赖
 
-不能将另一台电台的完整 EEPROM 数据当作字库直接写入。没有本机完整备份时，本工具不会生成可写入的整片映像。
+电台正常开机、退出发射/扫描/FM，插好写频线，关闭 K5Web、CHIRP 等占用串口的软件。此工具使用正常开机串口模式，**不是按住 PTT 的固件升级模式**。有字库之前，4M 中文菜单可能显示异常，但串口资源安装不需要使用中文菜单。
+
+解压最新 `W9YBZ-4M-Chinese.zip`，在解压目录运行。需要 Python 3 和 pyserial：
+
+```sh
+python -m pip install pyserial
+python radio-4m.py --port COM3 info
+```
+
+`COM3` 换成写频线实际端口。Linux 可用 `/dev/ttyUSB0`，命令中的 `python` 可换成 `python3`；若系统限制全局 pip，先建立并激活虚拟环境。串口无权限时需使用具有该串口访问权限的账户。`info` 只进行握手并显示固件版本，不写入 EEPROM。
+
+### 仍在使用原标准固件时
+
+标准版 `ENABLE_CHINESE_FULL=0` 没有扩容串口命令，无法用它读取完整 512KiB。**先保存原有 8KiB 设置/频道/校准备份**：
+
+```sh
+python radio-4m.py --port COM3 backup --size 8192 --output original-settings-8KiB.bin
+```
+
+备份经过两次读取比对；保留此文件及此前可用的固件。然后通过原有固件升级方式刷入所选 **4M 固件**，正常重新开机，再执行下面的安装命令。若已刷本包 4M 固件，可直接进入下一步。
+
+这是对早期文档“先写字库再刷固件”顺序的修正：工具需要电台先运行支持扩容串口命令的固件。刷 MCU 固件和写 EEPROM 字库是不同步骤。
+
+### 安装所选版本的资源
+
+例如已刷 `W9-4M-SPEC-ZH.bin`（频谱版）：
+
+```sh
+python radio-4m.py --port COM3 install --assets spectrum/zh/eeprom-assets --backup my-radio-before-font-512KiB.bin
+```
+
+通话版使用 `call/zh/eeprom-assets`，短信版使用 `messaging/zh/eeprom-assets`。工具检查资源清单与电台报告的固件版本必须一致。
+
+安装过程：
+
+1. 读取完整 524288 字节 EEPROM，再读一次核对；保存本机备份及 SHA256 后才开始写入。备份路径必须是不存在的新文件。
+2. 仅写入下表四类资源中需要更新的字节，不写整片 EEPROM；每块写完立即读回核对。
+3. 再读取完整 EEPROM，核对资源全部正确、资源以外的每个字节均与备份相同。出现 `PASS` 后关机重开，检查中文菜单、FM、CTCSS/DCS、MDC、手咪 PF 等。
+
+全片备份和校验可能需要数分钟，保持连接与供电，不操作电台。超时、读回不一致或版本不符会停止，不自动重试或清空 EEPROM；保留备份及 `.partial` 文件。若安装中断，排除问题后可用新的备份文件名重新安装，已正确写入的块会跳过。
+
+如果只想备份完整 EEPROM，不安装资源：
+
+```sh
+python radio-4m.py --port COM3 backup --output my-radio-512KiB.bin
+```
+
+源码目录使用时，脚本位于 `scripts/radio-4m.py`，资源路径以 `artifacts/4m/` 为前缀。打包目录下两个 Python 文件必须放在一起。本工具不提供任意地址写入、整片恢复或另一台电台数据导入功能。
+
+### 已有完整备份时的离线合并
+
+原 `eeprom-4m-assets.py apply` 仍可用于离线生成合并文件：
+
+```sh
+python eeprom-4m-assets.py apply --backup my-radio-512KiB.bin --assets spectrum/zh/eeprom-assets --output my-radio-patched-512KiB.bin
+```
+
+它只处理文件，不访问电台；8KiB/64KiB 备份不能代替 512KiB 完整备份。常规安装优先使用上面的串口 `install`，只写资源范围，不需要恢复整片映像。
 
 ## 修改范围
 
@@ -61,6 +110,8 @@ docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src" \
 
 ## English
 
-These three Chinese builds require compatible 4Mbit/512KiB EEPROM and their matching external resources. The MCU flash limit remains 60KiB. Existing bilingual profiles remain available unchanged; their English builds also work on expanded EEPROM without these resources.
+These Chinese builds require matching external resources and compatible 4Mbit/512KiB EEPROM. K5Web currently does not recognize the W9-4M version names, and its stock font package lacks this fork's menu bank.
 
-Read and keep your own complete 524288-byte EEPROM backup first. Run the offline `apply` command above with the resources for the selected profile. It verifies hashes, writes a new file, and preserves every byte outside the four documented resource ranges, including existing settings/calibration and welcome data. No device is accessed. Use a tool compatible with the actual chip to write and read back the result, then flash the corresponding packed firmware. The menu bank is profile-specific. These builds have passed offline checks and still need radio validation.
+Use the bundled `radio-4m.py` in normal powered-on mode (38400 baud), with Python 3 and pyserial. Close other serial clients. Replace COM3 with your actual serial port. On a standard build, first run `backup --size 8192` to preserve settings/calibration, then flash the chosen 4M firmware and restart normally. The expanded serial commands require the 4M build; initial font display may be incorrect until installation.
+
+Run the `install` example above with the matching profile resources and a NEW backup filename. Before writing, it reads the full EEPROM twice and saves your own 524288-byte backup plus SHA256. It writes only changed resource chunks, reads each back, and verifies the entire EEPROM against the expected merged image. All bytes outside resource ranges must match the backup. It stops on errors without retrying or erasing. After PASS, power-cycle the radio. These tools have passed offline protocol tests and still require hardware validation.

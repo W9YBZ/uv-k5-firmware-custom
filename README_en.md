@@ -2,7 +2,7 @@
 
 **语言版本: [English](./README_en.md), [中文](./README.md).**
 
-**4Mbit / 512KiB EEPROM**: three additional Chinese profiles and matching resource patches are available. Existing bilingual builds remain available. Back up the complete EEPROM before preparing external resources; see [4M instructions](doc/FIRMWARE_4M.md).
+**4Mbit / 512KiB EEPROM**: three additional Chinese profiles and matching resource patches are available. Existing bilingual builds remain available. A bundled serial installer backs up and verifies the complete EEPROM before writing resources; see [4M instructions](doc/FIRMWARE_4M.md).
 
 **This merged fork preserves W9YBZ speaker-mic PF, MDC1200 local monitor volume, channel-name display and Talk Permit, and adds a single startup beep.**
 
