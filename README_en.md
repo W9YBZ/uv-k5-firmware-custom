@@ -12,11 +12,12 @@ Both language builds include speaker-mic PF buttons, custom side buttons, Talk P
 
 | Output | Language | VOX | DTMF calling | Flash usage (61440-byte limit) |
 | --- | --- | --- | --- | --- |
-| `W9YBZ_KMC25-PF-ZH.bin` | Chinese | Disabled | Disabled | 59784 bytes; 1656 bytes free |
-| `W9YBZ_KMC25-PF-EN.bin` | English | Enabled | Enabled | 61296 bytes; 144 bytes free |
+| `W9YBZ_KMC25-PF-ZH.bin` | Chinese | Disabled | Disabled | 59800 bytes; 1640 bytes free |
+| `W9YBZ_KMC25-PF-EN.bin` | English | Enabled | Enabled | 61312 bytes; 128 bytes free |
 
 - **Single startup beep**: after startup initialization finishes and the main screen replaces the welcome screen, one 880Hz beep plays for about 200ms, even when key tones are disabled.
 - **Startup key compatibility**: the welcome screen exits when its normal countdown expires, even if number, direction or ordinary side keys remain held. EXIT still skips the welcome screen. The F-key mic ADC debug entry, optional MENU custom-loader entry and existing PTT boot behavior are unchanged. During normal operation, mic PF input must first show two consecutive released readings before accepting a press.
+- **Silent keypad-lock feedback**: blocked panel keys, including a short F press, no longer play rejection beeps. The lock display and long-F unlock remain. Reception, PTT, mic PF and side-button handling are unchanged; unlocked key tones and low-battery confirmation feedback remain available.
 - **MDC local monitor**: set the volume in `MDCMON` and select MDC beginning/end/both in the Roger menu. The monitor volume setting alone does not enable MDC TX signaling.
 - The Chinese build disables VOX and DTMF calling while retaining MDC1200.
 - The table describes `scripts/build-merged.sh`. Running `make build` directly uses different Makefile defaults. The LOSEHU version table and feature lists below describe other available build options, not features enabled in every current binary.

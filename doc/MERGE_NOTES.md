@@ -14,8 +14,8 @@
 
 用户最终选择：保留 W9YBZ 功能、频谱和 FM，关闭短信/APRS。源码中的短信/APRS 保留，但本轮固件不启用。
 
-英文完整配置：MIC_PF、自定义侧键、Talk Permit、MDC1200（含联系人/编辑/监听音）、VOX、FM、频谱；原装 EEPROM。GCC 15.2.0 原始镜像 61296 字节，剩余 144 字节。
-中文最终配置（已获用户确认）：关闭 VOX 和 DTMF 呼叫，保留手咪 PF、Talk Permit、MDC1200（含联系人/编辑/监听音）、频谱及 FM，关闭短信/APRS，使用原装 EEPROM。原始镜像 59784 字节，剩余 1656 字节；正式输出到 artifacts/zh。
+英文完整配置：MIC_PF、自定义侧键、Talk Permit、MDC1200（含联系人/编辑/监听音）、VOX、FM、频谱；原装 EEPROM。GCC 15.2.0 原始镜像 61312 字节，剩余 128 字节。
+中文最终配置（已获用户确认）：关闭 VOX 和 DTMF 呼叫，保留手咪 PF、Talk Permit、MDC1200（含联系人/编辑/监听音）、频谱及 FM，关闭短信/APRS，使用原装 EEPROM。原始镜像 59800 字节，剩余 1640 字节；正式输出到 artifacts/zh。
 为支持关闭 DTMF 呼叫，修复 app/action.c 和 ui/main.c 中缺失的条件编译保护，不改变呼叫功能开启时的行为。英文版保留 VOX 和 DTMF 呼叫。
 
 本轮不改变 Flash/bootloader 边界，不改变 EEPROM 要求。旧短信版已归档到仓库外 /home/yuhui/software_ws/uv-k5-build-history/merged-sms-23a1835。
@@ -57,3 +57,11 @@ docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src" uvk5-toolchain:alpine3
 已启用的开机特殊入口在欢迎倒计时之前处理：ENABLE_MIC_PF 的 F 键 ADC 调试、ENABLE_BOOTLOADER 的 MENU 自定义引导均保留；本次不修改 PTT 或芯片引导程序。EXIT 跳过欢迎画面、可选的关闭欢迎画面设置与开机密码流程保持不变。正常运行时的按键分发不变。
 
 验证：`python3 tests/test_boot_key_wait.py` 执行实际欢迎等待循环，模拟所有键持续按住、EXIT 跳过及不同欢迎画面/开机蜂鸣配置；另运行原手咪 PF 回归测试。中英文编译、打包 CRC 和解包一致性检查通过，尚未上机验证。
+
+## 锁定键盘时取消面板拒绝提示音
+
+仅在 ProcessKey 的两处键盘锁定拒绝分支增加 KEY_LOCK 判断：锁定时不播放“双嘟”提示音，仍显示两秒锁定提示，并保留长按 F / 配置的菜单长按解锁入口。共用这些分支的未锁定低电量提示仍可播放；低电量 EXIT 确认提示保持不变。
+
+不修改 AUDIO_PlayBeep 全局行为、接收处理、PTT、手咪 ADC/PF、侧键动作或发射中的 DTMF 按键处理。手咪动作本身已有的声音也不作全局静音。
+
+验证：`python3 tests/test_locked_key_feedback.py` 执行实际锁定过滤代码，覆盖面板按下/松开/长按静音、锁定显示、解锁入口、接收状态不变、PTT/手咪/侧键直通、发射绕过及低电量反馈；另运行启动及手咪 PF 回归测试。中英文编译、CRC 和解包一致性检查通过，尚未上机验证。

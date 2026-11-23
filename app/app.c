@@ -1724,7 +1724,8 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
             if (!bKeyHeld) {    // keypad is locked, tell the user
 #ifdef    ENABLE_WARNING
 
-                AUDIO_PlayBeep(BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL);
+                if (!gEeprom.KEY_LOCK)
+                    AUDIO_PlayBeep(BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL);
 #endif
                 gKeypadLocked = 4;      // 2 seconds
                 gUpdateDisplay = true;
@@ -1748,7 +1749,8 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
             // keypad is locked, tell the user
 #ifdef    ENABLE_WARNING
 
-            AUDIO_PlayBeep(BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL);
+            if (!gEeprom.KEY_LOCK)
+                AUDIO_PlayBeep(BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL);
 #endif
             gKeypadLocked = 4;          // 2 seconds
             gUpdateDisplay = true;
