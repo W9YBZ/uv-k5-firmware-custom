@@ -112,6 +112,7 @@ void (*action_opt_table[])(void) = {
 #else
         [ACTION_OPT_D_DCD] = &FUNCTION_NOP,
 #endif
+        [ACTION_OPT_VOLUME_TEST] = &FUNCTION_NOP, // sound is selected once by ACTION_SelectBeep
         [ACTION_OPT_WIDTH] = &ACTION_WIDTH,
 #ifdef ENABLE_SIDEFUNCTIONS_SEND
         [ACTION_OPT_SEND_CURRENT] = &ACTION_SEND_CURRENT,
@@ -177,6 +178,9 @@ static bool ACTION_GetToggleWillEnable(const enum ACTION_OPT_t action, bool *wil
 
 static BEEP_Type_t ACTION_SelectBeep(const enum ACTION_OPT_t action)
 {
+    if (action == ACTION_OPT_VOLUME_TEST)
+        return BEEP_880HZ_200MS; // explicit audition, even with key beeps disabled
+
     bool will_enable = false;
 
     if (ACTION_GetToggleWillEnable(action, &will_enable))

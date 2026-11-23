@@ -38,6 +38,16 @@ static const uint32_t gDefaultFrequencyTable[] =
 EEPROM_Config_t gEeprom={0};
  int               key_dir;
 
+static __attribute__((noinline)) uint8_t SETTINGS_LoadShortAction(uint8_t action, uint8_t fallback) {
+#ifdef ENABLE_SIDEFUNCTIONS_SEND
+    if (action < ACTION_OPT_SEND_CURRENT || action == ACTION_OPT_VOLUME_TEST)
+#else
+    if (action < ACTION_OPT_LEN)
+#endif
+        return action;
+    return fallback;
+}
+
 void SETTINGS_InitEEPROM(void)
 {
     uint8_t Data[16] = {0};
@@ -143,16 +153,16 @@ void SETTINGS_InitEEPROM(void)
     // 1FF8..1FFF
     EEPROM_ReadBuffer(0x1FF8, Data, 8);
     gEeprom.KEY_M_LONG_PRESS_ACTION       = (Data[0] < ACTION_OPT_LEN) ? Data[0] : ACTION_OPT_SWITCH_DEMODUL;
-    gEeprom.KEY_1_SHORT_PRESS_ACTION      = (Data[1] < ACTION_OPT_LEN-2) ? Data[1] : ACTION_OPT_MONITOR;
+    gEeprom.KEY_1_SHORT_PRESS_ACTION      = SETTINGS_LoadShortAction(Data[1], ACTION_OPT_MONITOR);
     gEeprom.KEY_1_LONG_PRESS_ACTION       = (Data[2] < ACTION_OPT_LEN) ? Data[2] : ACTION_OPT_D_DCD;
-    gEeprom.KEY_2_SHORT_PRESS_ACTION      = (Data[3] < ACTION_OPT_LEN-2) ? Data[3] : ACTION_OPT_WIDTH;
+    gEeprom.KEY_2_SHORT_PRESS_ACTION      = SETTINGS_LoadShortAction(Data[3], ACTION_OPT_WIDTH);
     gEeprom.KEY_2_LONG_PRESS_ACTION       = (Data[4] < ACTION_OPT_LEN) ? Data[4] : ACTION_OPT_FLASHLIGHT;
 #ifdef ENABLE_MIC_PF
     // 1FE8..1FEF
     EEPROM_ReadBuffer(0x1FE8, Data, 8);
-        gEeprom.MIC_PF1_SHORT_PRESS_ACTION    = (Data[0] < ACTION_OPT_LEN-2) ? Data[0] : ACTION_OPT_A_B;
+        gEeprom.MIC_PF1_SHORT_PRESS_ACTION    = SETTINGS_LoadShortAction(Data[0], ACTION_OPT_A_B);
     gEeprom.MIC_PF1_LONG_PRESS_ACTION     = (Data[1] < ACTION_OPT_LEN) ? Data[1] : ACTION_OPT_WIDTH;
-    gEeprom.MIC_PF2_SHORT_PRESS_ACTION    = (Data[2] < ACTION_OPT_LEN-2) ? Data[2] : ACTION_OPT_POWER;
+    gEeprom.MIC_PF2_SHORT_PRESS_ACTION    = SETTINGS_LoadShortAction(Data[2], ACTION_OPT_POWER);
     gEeprom.MIC_PF2_LONG_PRESS_ACTION     = (Data[3] < ACTION_OPT_LEN) ? Data[3] : ACTION_OPT_FLASHLIGHT;
 #endif
 #endif

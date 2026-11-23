@@ -538,12 +538,13 @@ const t_sidefunction SIDEFUNCTIONS[] =
                {切换调制模式, ACTION_OPT_SWITCH_DEMODUL},
                {DTMF解码, ACTION_OPT_D_DCD},
                {切换宽窄带, ACTION_OPT_WIDTH},
+#ifdef ENABLE_BLMIN_TMP_OFF
+                {"BLMIN\nTMP OFF",  ACTION_OPT_BLMIN_TMP_OFF}, 		//BackLight Minimum Temporay OFF
+#endif
+               {"VOL", ACTION_OPT_VOLUME_TEST},
 #ifdef ENABLE_SIDEFUNCTIONS_SEND
                {主信道发射, ACTION_OPT_SEND_CURRENT},
                {副信道发射, ACTION_OPT_SEND_OTHER},
-#endif
-#ifdef ENABLE_BLMIN_TMP_OFF
-                {"BLMIN\nTMP OFF",  ACTION_OPT_BLMIN_TMP_OFF}, 		//BackLight Minimum Temporay OFF
 #endif
         };
 const t_sidefunction *gSubMenu_SIDEFUNCTIONS = SIDEFUNCTIONS;

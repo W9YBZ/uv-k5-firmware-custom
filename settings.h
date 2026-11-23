@@ -97,6 +97,7 @@ enum ACTION_OPT_t {
     ACTION_OPT_SEND_CURRENT,
     ACTION_OPT_SEND_OTHER,
 #endif
+    ACTION_OPT_VOLUME_TEST, // appended: keep existing saved action IDs unchanged
     ACTION_OPT_LEN
 };
 
