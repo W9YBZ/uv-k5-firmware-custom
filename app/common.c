@@ -1,9 +1,32 @@
+#include <stddef.h>
 #include "app/chFrScanner.h"
 #include "audio.h"
 #include "functions.h"
 #include "misc.h"
 #include "settings.h"
 #include "ui/ui.h"
+
+__attribute__((noinline)) bool COMMON_HasSideKeyLockAction(void) {
+#ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
+#ifdef ENABLE_MIC_PF
+    enum { count = 8 };
+    _Static_assert(offsetof(EEPROM_Config_t, MIC_PF2_LONG_PRESS_ACTION) -
+                   offsetof(EEPROM_Config_t, KEY_1_SHORT_PRESS_ACTION) == count - 1,
+                   "Side-key mappings must remain consecutive bytes");
+#else
+    enum { count = 4 };
+    _Static_assert(offsetof(EEPROM_Config_t, KEY_2_LONG_PRESS_ACTION) -
+                   offsetof(EEPROM_Config_t, KEY_1_SHORT_PRESS_ACTION) == count - 1,
+                   "Side-key mappings must remain consecutive bytes");
+#endif
+    // Inspect the byte representation of the four/eight saved side-key actions.
+    const unsigned char *actions = (const unsigned char *)&gEeprom;
+    for (unsigned i = 0; i < count; ++i)
+        if (actions[offsetof(EEPROM_Config_t, KEY_1_SHORT_PRESS_ACTION) + i] == ACTION_OPT_KEYLOCK)
+            return true;
+#endif
+    return false;
+}
 
 void COMMON_KeypadLockToggle() {
 

@@ -9,19 +9,34 @@ source = (ROOT / 'app/app.c').read_text()
 start = source.index('    bool lowBatPopup =')
 end = source.index('    if (Key <= KEY_9 || Key == KEY_F)', start)
 lock_filter = source[start:end]
+common_source = (ROOT / 'app/common.c').read_text()
+a = common_source.index('bool COMMON_HasSideKeyLockAction(void) {')
+z = common_source.index('\nvoid COMMON_KeypadLockToggle()', a)
+side_policy = common_source[a:z]
+
 prelude = r'''
 #include <assert.h>
+#include <stddef.h>
 #include <stdbool.h>
 #include "driver/keyboard.h"
 enum { FUNCTION_FOREGROUND, FUNCTION_TRANSMIT, FUNCTION_RECEIVE, FUNCTION_MONITOR };
 enum { DISPLAY_MAIN, DISPLAY_MENU, ACTION_OPT_KEYLOCK = 9 };
 enum { BEEP_1KHZ_60MS_OPTIONAL, BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL };
-static struct { bool KEY_LOCK; unsigned KEY_M_LONG_PRESS_ACTION; } gEeprom;
+typedef struct {
+    bool KEY_LOCK;
+    unsigned KEY_M_LONG_PRESS_ACTION;
+    uint8_t KEY_1_SHORT_PRESS_ACTION, KEY_1_LONG_PRESS_ACTION;
+    uint8_t KEY_2_SHORT_PRESS_ACTION, KEY_2_LONG_PRESS_ACTION;
+    uint8_t MIC_PF1_SHORT_PRESS_ACTION, MIC_PF1_LONG_PRESS_ACTION;
+    uint8_t MIC_PF2_SHORT_PRESS_ACTION, MIC_PF2_LONG_PRESS_ACTION;
+} EEPROM_Config_t;
+static EEPROM_Config_t gEeprom;
 static bool gLowBattery, gLowBatteryConfirmed, gUpdateDisplay;
 static unsigned gScreenToDisplay, gCurrentFunction, gKeypadLocked;
 static unsigned beep_count;
 static bool passed;
 static void AUDIO_PlayBeep(unsigned beep) { ++beep_count; }
+SIDE_POLICY_FUNCTION
 static void filter_key(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
     passed = false;
 '''
@@ -43,11 +58,7 @@ int main(void) {
             for (unsigned event = 0; event < 3; ++event) {
                 reset(true, function);
                 filter_key(key, event != 1, event == 2);
-#ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
-                bool unlock = key == KEY_MENU && event == 2;
-#else
                 bool unlock = false;
-#endif
                 assert(passed == unlock);
                 assert(beep_count == 0);
                 assert(gCurrentFunction == function); // filter never alters RX state
@@ -66,6 +77,37 @@ int main(void) {
                 assert(passed && beep_count == 0 && !gUpdateDisplay && gKeypadLocked == 0);
             }
         }
+    }
+    // Each configured side-key action enables exclusive side-key unlocking.
+    uint8_t *actions[] = {
+        &gEeprom.KEY_1_SHORT_PRESS_ACTION, &gEeprom.KEY_1_LONG_PRESS_ACTION,
+        &gEeprom.KEY_2_SHORT_PRESS_ACTION, &gEeprom.KEY_2_LONG_PRESS_ACTION,
+        &gEeprom.MIC_PF1_SHORT_PRESS_ACTION, &gEeprom.MIC_PF1_LONG_PRESS_ACTION,
+        &gEeprom.MIC_PF2_SHORT_PRESS_ACTION, &gEeprom.MIC_PF2_LONG_PRESS_ACTION
+    };
+    assert(!COMMON_HasSideKeyLockAction()); // menu-key mapping does not count
+    for (unsigned i = 0; i < 8; ++i) {
+        *actions[i] = ACTION_OPT_KEYLOCK;
+        bool exclusive = false;
+#ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
+        exclusive = i < 4;
+#ifdef ENABLE_MIC_PF
+        exclusive = true;
+#endif
+#endif
+        assert(COMMON_HasSideKeyLockAction() == exclusive);
+        reset(true, FUNCTION_FOREGROUND);
+        filter_key(KEY_F, true, true);
+        assert(passed == !exclusive && beep_count == 0);
+#ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
+        filter_key(KEY_MENU, true, true);
+        assert(!passed && beep_count == 0);
+#endif
+        for (KEY_Code_t key = KEY_PTT; key <= KEY_MIC_PF2; ++key) {
+            filter_key(key, true, false);
+            assert(passed && beep_count == 0);
+        }
+        *actions[i] = 0;
     }
     // The filter still bypasses TX key handling and normal unlocked operation.
     for (KEY_Code_t key = KEY_0; key < KEY_INVALID; ++key) {
@@ -97,7 +139,7 @@ int main(void) {
 with tempfile.TemporaryDirectory() as tmp:
     test = Path(tmp) / 'locked_keys.c'
     exe = Path(tmp) / 'locked_keys'
-    test.write_text(prelude + lock_filter + checks)
+    test.write_text(prelude.replace("SIDE_POLICY_FUNCTION", side_policy) + lock_filter + checks)
     for custom in (False, True):
         for warning in (False, True):
             command = ['cc', '-std=c11', '-I', str(ROOT)]
@@ -105,6 +147,8 @@ with tempfile.TemporaryDirectory() as tmp:
                 command.append('-DENABLE_CUSTOM_SIDEFUNCTIONS')
             if warning:
                 command.append('-DENABLE_WARNING')
-            subprocess.run(command + [str(test), '-o', str(exe)], check=True)
-            subprocess.run([str(exe)], check=True)
-print('Locked panel keys silent; lock display, unlock, PTT/mic/side pass-through, RX state, TX bypass and low-battery feedback checks passed.')
+            for mic in (False, True):
+                mic_flags = ['-DENABLE_MIC_PF'] if mic else []
+                subprocess.run(command + mic_flags + [str(test), '-o', str(exe)], check=True)
+                subprocess.run([str(exe)], check=True)
+print('Locked panel keys silent; lock display, unlock policy for all eight mappings, PTT/mic/side pass-through, RX state, TX bypass and low-battery feedback checks passed.')

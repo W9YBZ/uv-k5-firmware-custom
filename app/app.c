@@ -29,6 +29,7 @@
 #include "app/aircopy.h"
 #endif
 
+#include "app/common.h"
 #include "app/app.h"
 #include "app/chFrScanner.h"
 #include "app/dtmf.h"
@@ -1106,13 +1107,15 @@ static void CheckKeys(void) {
         return;
     }
 
-    if (gDebounceCounter < key_repeat_delay_10ms ||
+    // Keep all other long-press timings, including F-to-lock, unchanged.
+    const uint16_t repeatDelay = (Key == KEY_F && gEeprom.KEY_LOCK) ? 200 : key_repeat_delay_10ms;
+    if (gDebounceCounter < repeatDelay ||
         Key == KEY_INVALID) // the button is not held long enough for repeat yet, or not really pressed
         return;
 
-    if (gDebounceCounter == key_repeat_delay_10ms) //initial key repeat with longer delay
+    if (gDebounceCounter == repeatDelay) //initial key repeat with longer delay
     {
-        if (Key != KEY_PTT) {
+        if (Key != KEY_PTT && !gKeyBeingHeld) {
             gKeyBeingHeld = true;
             ProcessKey(Key, true, true); // key held event
 
@@ -1133,7 +1136,7 @@ static void CheckKeys(void) {
         if (gDebounceCounter < 0xFFFF)
             return;
 
-        gDebounceCounter = key_repeat_delay_10ms + 1;
+        gDebounceCounter = repeatDelay + 1;
     }
 
 }
@@ -1721,7 +1724,7 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
             if (!bKeyPressed)
                 return;
 
-            if (!bKeyHeld) {    // keypad is locked, tell the user
+            if (!bKeyHeld || COMMON_HasSideKeyLockAction()) {    // configured side key owns unlock
 #ifdef    ENABLE_WARNING
 
                 if (!gEeprom.KEY_LOCK)
@@ -1732,18 +1735,8 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
                 return;
             }
         }
-            // KEY_MENU has a special treatment here, because we want to pass hold event to ACTION_Handle
-            // but we don't want it to complain when initial press happens
-            // we want to react on realese instead
-            // KEY_MENU has a special treatment here, because we want to pass hold event to ACTION_Handle
-            // but we don't want it to complain when initial press happens
-            // we want to react on realese instead
-#ifdef ENABLE_CUSTOM_SIDEFUNCTIONS
-            else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 && Key != KEY_MIC_PF1 && Key != KEY_MIC_PF2 &&        // pass side buttons
-                 !(Key == KEY_MENU && bKeyHeld && gEeprom.KEY_M_LONG_PRESS_ACTION == ACTION_OPT_KEYLOCK)) // pass KEY_MENU held
-#else
-        else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 && Key != KEY_MIC_PF1 && Key != KEY_MIC_PF2) // pass KEY_MENU held
-#endif
+        else if (Key != KEY_SIDE1 && Key != KEY_SIDE2 &&
+                 Key != KEY_MIC_PF1 && Key != KEY_MIC_PF2)
         {
 
             // keypad is locked, tell the user

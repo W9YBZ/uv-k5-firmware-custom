@@ -38,6 +38,7 @@
 #include "settings.h"
 #include "ui/helper.h"
 #include "ui/inputbox.h"
+#include "app/common.h"
 #include "ui/main.h"
 #include "ui/ui.h"
 
@@ -365,25 +366,8 @@ void UI_DisplayMain(void) {
 
 
 
-#ifdef test
-        UI_PrintStringSmall("press # long", 0, LCD_WIDTH, 1);
-
-
-        UI_PrintStringSmall("to unlock",    0, LCD_WIDTH, 3);
-#else
-#ifdef ENABLE_ENGLISH
-        UI_PrintStringSmall("press # long", 0, LCD_WIDTH, 1);
-
-
-        UI_PrintStringSmall("to unlock",    0, LCD_WIDTH, 3);
-#else
-//长按 # 键解锁
-
-        UI_PrintStringSmall(长按井键解锁, 0, LCD_WIDTH, 1);
-#endif
-
-#endif
-
+        UI_PrintStringSmall(COMMON_HasSideKeyLockAction() ? KEYPAD_UNLOCK_SIDE : KEYPAD_UNLOCK_F,
+                            0, LCD_WIDTH, 1);
 
         ST7565_BlitFullScreen();
         return;

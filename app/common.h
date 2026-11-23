@@ -6,6 +6,7 @@
 #include "settings.h"
 #include "ui/ui.h"
 
+bool COMMON_HasSideKeyLockAction(void);
 void COMMON_KeypadLockToggle();
 
 void COMMON_SwitchVFOs();

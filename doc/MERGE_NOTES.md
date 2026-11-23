@@ -14,8 +14,8 @@
 
 用户最终选择：保留 W9YBZ 功能、频谱和 FM，关闭短信/APRS。源码中的短信/APRS 保留，但本轮固件不启用。
 
-英文完整配置：MIC_PF、自定义侧键、Talk Permit、MDC1200（含联系人/编辑/监听音）、VOX、FM、频谱；原装 EEPROM。GCC 15.2.0 原始镜像 61312 字节，剩余 128 字节。
-中文最终配置（已获用户确认）：关闭 VOX 和 DTMF 呼叫，保留手咪 PF、Talk Permit、MDC1200（含联系人/编辑/监听音）、频谱及 FM，关闭短信/APRS，使用原装 EEPROM。原始镜像 59800 字节，剩余 1640 字节；正式输出到 artifacts/zh。
+英文完整配置：MIC_PF、自定义侧键、Talk Permit、MDC1200（含联系人/编辑/监听音）、VOX、FM、频谱；原装 EEPROM。GCC 15.2.0 原始镜像 61408 字节，剩余 32 字节。
+中文最终配置（已获用户确认）：关闭 VOX 和 DTMF 呼叫，保留手咪 PF、Talk Permit、MDC1200（含联系人/编辑/监听音）、频谱及 FM，关闭短信/APRS，使用原装 EEPROM。原始镜像 59880 字节，剩余 1560 字节；正式输出到 artifacts/zh。
 为支持关闭 DTMF 呼叫，修复 app/action.c 和 ui/main.c 中缺失的条件编译保护，不改变呼叫功能开启时的行为。英文版保留 VOX 和 DTMF 呼叫。
 
 本轮不改变 Flash/bootloader 边界，不改变 EEPROM 要求。旧短信版已归档到仓库外 /home/yuhui/software_ws/uv-k5-build-history/merged-sms-23a1835。
@@ -65,3 +65,14 @@ docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src" uvk5-toolchain:alpine3
 不修改 AUDIO_PlayBeep 全局行为、接收处理、PTT、手咪 ADC/PF、侧键动作或发射中的 DTMF 按键处理。手咪动作本身已有的声音也不作全局静音。
 
 验证：`python3 tests/test_locked_key_feedback.py` 执行实际锁定过滤代码，覆盖面板按下/松开/长按静音、锁定显示、解锁入口、接收状态不变、PTT/手咪/侧键直通、发射绕过及低电量反馈；另运行启动及手咪 PF 回归测试。中英文编译、CRC 和解包一致性检查通过，尚未上机验证。
+
+## F 延时解锁与侧键优先（2026-11-23）
+
+已撤回尚未提交的 F＋侧键2同时按下方案，未改动键盘扫描、GPIO 或 ADC。
+
+- 无侧键锁定动作：锁定状态下按住 F 约 2 秒才解锁；未锁定时长按 F 上锁仍为原约 400ms。
+- 机身侧键1/2、手咪 PF1/PF2 的任一短按或长按配置为 ACTION_OPT_KEYLOCK 时，只允许对应侧键解锁，F 长按不再解锁；侧键仍使用原有按下/松开/长按处理。MENU 长按不再作为绕过锁定的解锁入口。
+- UI 按配置显示 F 2 秒解锁或侧键解锁提示；锁定拒绝提示继续静音，PTT、接收与其他手咪动作不作修改。
+- 增加每次按住只触发一次长按动作的保护，避免未锁定时按住 F 先上锁、达到 2 秒后又自动解锁。
+
+验证：锁定过滤测试覆盖全部八个侧键配置、无侧键配置、MENU 不绕过及 PTT/手咪直通；`python3 tests/test_unlock_hold_timing.py` 覆盖 2 秒前不解锁、达时解锁、原上锁与侧键长按时序、长按只触发一次、方向键重复及 PTT 独立路径。启动和手咪 ADC 回归测试均通过；中英文构建、CRC 及解包一致性检查通过，尚未上机验证。
