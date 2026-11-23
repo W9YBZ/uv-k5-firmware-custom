@@ -9,7 +9,7 @@
 
 基于 W9YBZ 的 KMC-25 PF / Talk Permit 定制版本，合入 losehu/main 的更新；两侧提交历史均保留。详细合并记录见 [MERGE_NOTES.md](doc/MERGE_NOTES.md)。
 
-两版均保留手咪 PF、自定义侧键、Talk Permit、MDC1200（含联系人、编辑和本地监听音量）、双行高度信道名、频谱和 FM，均关闭短信/APRS，无需扩容 EEPROM。
+标准版的两种语言均保留手咪 PF、自定义侧键、Talk Permit、MDC1200（含联系人、编辑和本地监听音量）、双行高度信道名、频谱和 FM，均关闭短信/APRS，无需扩容 EEPROM。
 
 | 构建产物 | 语言 | VOX | DTMF 呼叫 | Flash 占用（上限 61440 字节） |
 | --- | --- | --- | --- | --- |
@@ -24,6 +24,12 @@
 - **MDC 本地监听**：在 `MDCMON` 中设置音量，并在“首尾音 / Roger”中选择 MDC 首音、尾音或首尾音；仅设置监听音量不会自动启用 MDC 发射信令。
 - 中文版关闭的是 VOX 和 DTMF 呼叫，MDC1200 功能保留。
 - 上表对应 `scripts/build-merged.sh` 的配置；直接执行 `make build` 使用 Makefile 默认值，功能组合不同。下方 LOSEHU 版本表及功能列表为其他可选构建的参考，不代表本轮固件全部启用。
+
+## 可选固件配置与 24C512
+
+新增三组中英文构建，共六个固件：标准版保持当前组合；通话版恢复 VOX/DTMF 呼叫并关闭频谱；短信/APRS 版开启短信及 DTMF 呼叫、关闭频谱，中文仍关闭 VOX。所有配置保留 FM、MDC1200 和 W9YBZ 定制。
+
+24C512 的 64KB 是 EEPROM 数据容量，程序仍限于 60KiB；本次配置不修改 EEPROM 布局、不要求额外字库。完整功能表、文件名、操作和构建方法见 [固件配置说明](doc/FIRMWARE_VARIANTS.md)。运行 `scripts/build-variants.sh` 可生成全部版本及校验压缩包；原 `scripts/build-merged.sh` 仍构建标准版。
 
 ## 手咪 MPF1 接触问题（用户实测，2026-11-13）
 

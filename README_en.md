@@ -8,7 +8,7 @@
 
 This build preserves the W9YBZ KMC-25 PF / Talk Permit customizations and merges updates from losehu/main, retaining both Git histories. See [MERGE_NOTES.md](doc/MERGE_NOTES.md) for merge details (Chinese).
 
-Both language builds include speaker-mic PF buttons, custom side buttons, Talk Permit, MDC1200 (contacts, editing and local monitor volume), full-height channel names, spectrum and FM. SMS/APRS is disabled in both builds. Neither build requires EEPROM expansion.
+Both standard language builds include speaker-mic PF buttons, custom side buttons, Talk Permit, MDC1200 (contacts, editing and local monitor volume), full-height channel names, spectrum and FM. SMS/APRS is disabled in both builds. Neither build requires EEPROM expansion.
 
 | Output | Language | VOX | DTMF calling | Flash usage (61440-byte limit) |
 | --- | --- | --- | --- | --- |
@@ -23,6 +23,12 @@ Both language builds include speaker-mic PF buttons, custom side buttons, Talk P
 - **MDC local monitor**: set the volume in `MDCMON` and select MDC beginning/end/both in the Roger menu. The monitor volume setting alone does not enable MDC TX signaling.
 - The Chinese build disables VOX and DTMF calling while retaining MDC1200.
 - The table describes `scripts/build-merged.sh`. Running `make build` directly uses different Makefile defaults. The LOSEHU version table and feature lists below describe other available build options, not features enabled in every current binary.
+
+## Optional profiles and 24C512
+
+Six packed firmware images are available through three bilingual profiles: Standard preserves the current feature combinations; Call enables VOX/DTMF calling with spectrum disabled; Messaging enables messaging/APRS and DTMF calling with spectrum disabled, leaving VOX off in Chinese. All profiles retain FM, MDC1200 and the W9YBZ customizations.
+
+24C512 supplies 64KiB of data EEPROM; executable Flash remains limited to 60KiB. These profiles preserve the EEPROM layout and require no external font image. See [profile details, feature table and build instructions](doc/FIRMWARE_VARIANTS.md) (Chinese with English summary). `scripts/build-variants.sh` builds all profiles and a verified firmware bundle; `scripts/build-merged.sh` continues to build Standard only.
 
 ## MPF1 connector contact issue (user verified, 2026-11-13)
 

@@ -86,3 +86,7 @@ docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/src" uvk5-toolchain:alpine3
 ACTION_OPT_VOLUME_TEST 追加到枚举末尾，原动作编号保持不变；短按配置读取允许新试听动作并继续拒绝发射类动作。菜单将发射类动作置于末尾，使短按菜单能选到 VOL 而不暴露发射项。只读配置的有效性判断集中到一个小函数，避免重复增加 Flash 占用。
 
 验证：`python3 tests/test_volume_test_action.py` 使用实际动作枚举、菜单表、派发函数、蜂鸣选择、配置读取检查和音频入口保护，覆盖旧 ID 保持、短按菜单及保存值范围、机身/手咪短按长按一次一声、关闭按键音仍试听、接收/监听跳过及不产生发射请求。原解锁、键盘静音、开机与手咪 ADC 回归测试通过。中英文编译及 CRC/解包一致性检查通过；音量试听尚未上机验证。
+
+## 多配置构建与 24C512（2026-11-23）
+
+新增 standard/call/messaging 三组中英文构建，恢复功能通过取舍频谱实现，不增加程序区、不更改 EEPROM 布局；标准版二进制保持一致。配置表、构建和校验说明见 [FIRMWARE_VARIANTS.md](FIRMWARE_VARIANTS.md)。所有原固件源文件及标准构建脚本均未修改。
