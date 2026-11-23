@@ -1558,8 +1558,13 @@ void UI_ShowChineseMenu() {
 
 #if ENABLE_CHINESE_FULL == 4 && !defined(ENABLE_ENGLISH)
     uint8_t name[15];
-    name[15] = 0;
+    name[14] = 0;
+#ifdef ENABLE_EEPROM_4M
+    // Dedicated 4M menu-name bank; generated to match this profile's menu order.
+    EEPROM_ReadBuffer(0x7F000 + gMenuCursor * 14, name, 14);
+#else
     EEPROM_ReadBuffer(0x028B0 + gMenuCursor * 14, name, 14);
+#endif
     for (cnt_menu = 0; cnt_menu < 7 && name[cnt_menu]!= 0; cnt_menu++) {
         if (is_chn(/*MenuList[gMenuCursor].name[cnt_menu]*/name[cnt_menu]) != 255)//中文
 #else

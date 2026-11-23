@@ -2,6 +2,8 @@
 
 **语言版本: [English](./README_en.md), [中文](./README.md).**
 
+**4Mbit / 512KiB EEPROM**: three additional Chinese profiles and matching resource patches are available. Existing bilingual builds remain available. Back up the complete EEPROM before preparing external resources; see [4M instructions](doc/FIRMWARE_4M.md).
+
 **This merged fork preserves W9YBZ speaker-mic PF, MDC1200 local monitor volume, channel-name display and Talk Permit, and adds a single startup beep.**
 
 ## Current W9YBZ merged build
@@ -12,7 +14,7 @@ Both standard language builds include speaker-mic PF buttons, custom side button
 
 | Output | Language | VOX | DTMF calling | Flash usage (61440-byte limit) |
 | --- | --- | --- | --- | --- |
-| `W9YBZ_KMC25-PF-ZH.bin` | Chinese | Disabled | Disabled | 59908 bytes; 154 bytes free |
+| `W9YBZ_KMC25-PF-ZH.bin` | Chinese | Disabled | Disabled | 59908 bytes; 1532 bytes free |
 | `W9YBZ_KMC25-PF-EN.bin` | English | Enabled | Enabled | 61436 bytes; 4 bytes free |
 
 - **Single startup beep**: after startup initialization finishes and the main screen replaces the welcome screen, one 880Hz beep plays for about 200ms, even when key tones are disabled.
