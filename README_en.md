@@ -15,7 +15,7 @@ Both standard language builds include speaker-mic PF buttons, custom side button
 | Output | Language | VOX | DTMF calling | Flash usage (61440-byte limit) |
 | --- | --- | --- | --- | --- |
 | `W9YBZ_KMC25-PF-ZH.bin` | Chinese | Disabled | Disabled | 59908 bytes; 1532 bytes free |
-| `W9YBZ_KMC25-PF-EN.bin` | English | Enabled | Enabled | 61436 bytes; 4 bytes free |
+| `W9YBZ_KMC25-PF-EN.bin` | English | Enabled | Enabled | 61440 bytes; 0 bytes free |
 
 - **Single startup beep**: after startup initialization finishes and the main screen replaces the welcome screen, one 880Hz beep plays for about 200ms, even when key tones are disabled.
 - **Startup key compatibility**: the welcome screen exits when its normal countdown expires, even if number, direction or ordinary side keys remain held. EXIT still skips the welcome screen. The F-key mic ADC debug entry, optional MENU custom-loader entry and existing PTT boot behavior are unchanged. During normal operation, mic PF input must first show two consecutive released readings before accepting a press.
