@@ -200,6 +200,11 @@ void UI_PrintStringSmall(const char *pString, uint8_t Start, uint8_t End, uint8_
     uint8_t *pFb1 = gFrameBuffer[Line + 1] + Start;
     uint8_t now_pixel = 0;
     for (unsigned short i = 0; i < char_num; i++) {
+#if ENABLE_CHINESE_FULL == 4
+        // Long names must not wrap into the next page's left-hand VFO label.
+        if (now_pixel + (cn_flag[i] ? 13 : 7) > LCD_WIDTH - (Start % LCD_WIDTH))
+            break;
+#endif
         if (cn_flag[i] == 0) {
             if (true_char[i] > ' ') {
                 const unsigned int index = (unsigned int) true_char[i] - ' ' - 1;
