@@ -2,6 +2,8 @@
 
 **语言版本: [English](./README_en.md), [中文](./README.md).**
 
+**Current firmware catalog (9 images)**: see the [profile comparison and unified bundle guide](doc/FIRMWARE_CATALOG.md) for the six universal bilingual and three expanded Chinese builds.
+
 **4Mbit / 512KiB EEPROM**: three additional Chinese profiles and matching resource patches are available. Existing bilingual builds remain available. A bundled serial installer backs up and verifies the complete EEPROM before writing resources; see [4M instructions](doc/FIRMWARE_4M.md).
 
 **This merged fork preserves W9YBZ speaker-mic PF, MDC1200 local monitor volume, channel-name display and Talk Permit, and adds a single startup beep.**
