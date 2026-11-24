@@ -38,7 +38,8 @@ enum BEEP_Type_t
 	BEEP_880HZ_60MS_TRIPLE_BEEP,
 	BEEP_2TONE_RISE_OPTIONAL,
 	BEEP_2TONE_FALL_OPTIONAL,
-	BEEP_TALK_PREMIT             // talk-permit tone played at TX start
+	BEEP_TALK_PREMIT,            // talk-permit tone played at TX start
+	BEEP_1KHZ_60MS              // mandatory neutral feedback for middle TX power
 };
 
 typedef enum BEEP_Type_t BEEP_Type_t;
